@@ -3,1107 +3,1356 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vehicle Dynamics Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Agricultural AGV Dynamics Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg: #f4f5f7;
-    --surface: #ffffff;
-    --surface2: #f0f1f4;
-    --border: #dde0e8;
-    --border-strong: #c8ccd8;
-    --accent: #1a56db;
-    --accent-light: #eff4ff;
-    --accent2: #0e9f6e;
-    --accent2-light: #f0fdf4;
-    --danger: #c81e1e;
-    --danger-light: #fdf2f2;
-    --amber: #b45309;
-    --amber-light: #fffbeb;
-    --text: #111827;
-    --muted: #6b7280;
-    --label: #374151;
-    --green: #057a55;
-    --mono: 'DM Mono', monospace;
-    --sans: 'DM Sans', sans-serif;
-    --cond: 'DM Sans', sans-serif;
-  }
+:root {
+  --bg:           #f2f4f0;
+  --bg2:          #e8ebe4;
+  --surface:      #ffffff;
+  --surface2:     #f5f6f3;
+  --border:       #dde0d8;
+  --border-s:     #c5c9bc;
+  --green:        #2d6a2d;
+  --green-mid:    #3d8b3d;
+  --green-light:  #eaf2ea;
+  --green-pale:   #f3f8f3;
+  --earth:        #7a5c2e;
+  --earth-light:  #f7f0e6;
+  --sky:          #1a5f7a;
+  --sky-light:    #e6f3f8;
+  --warn:         #b45309;
+  --warn-light:   #fef3c7;
+  --danger:       #9f1239;
+  --danger-light: #fff1f2;
+  --text:         #1a1f15;
+  --muted:        #6b7560;
+  --label:        #374030;
+  --mono:         'Azeret Mono', monospace;
+  --sans:         'Figtree', sans-serif;
+  --r:            10px;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    padding: 0;
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+}
 
-  /* ─── HEADER ─────────────────────────────────── */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 40px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .logo-mark {
-    width: 34px; height: 34px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono);
-    font-size: 13px; font-weight: 700;
-    color: #fff;
-    flex-shrink: 0;
-  }
-  header h1 {
-    font-family: var(--sans);
-    font-size: 18px; font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--text);
-  }
-  header span {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-left: auto;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 4px;
-  }
+/* subtle field row texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 39px,
+    rgba(45,106,45,0.04) 39px, rgba(45,106,45,0.04) 40px
+  );
+  pointer-events: none; z-index: 0;
+}
+.wrapper, header, .tabs-bar { position: relative; z-index: 1; }
 
-  /* ─── LAYOUT ─────────────────────────────────── */
-  .wrapper {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 32px 40px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
-  }
+/* ─── HEADER ─────────────────────────── */
+header {
+  background: var(--green);
+  padding: 0 36px;
+  display: flex; align-items: stretch; gap: 0;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.hlogo {
+  background: var(--green-mid);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 10px;
+  border-right: 1px solid rgba(255,255,255,0.12);
+}
+.hlogo-icon {
+  width: 32px; height: 32px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.hlogo h1 {
+  font-family: var(--mono); font-size: 13px; font-weight: 700;
+  color: #fff; letter-spacing: 0.04em; line-height: 1.3;
+}
+.hlogo h1 span { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,0.65); letter-spacing: 0.08em; }
+.hpills { display: flex; align-items: center; gap: 8px; padding: 0 20px; }
+.hpill {
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 3px 9px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.hpill.live { color: #a8f0a8; border-color: rgba(168,240,168,0.35); background: rgba(168,240,168,0.1); }
+.hpill.live::before { content: '● '; font-size: 7px; }
+.hright { margin-left: auto; display: flex; align-items: center; gap: 6px; padding-right: 4px; }
 
-  /* ─── SECTIONS ───────────────────────────────── */
-  .section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  .section-header {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-icon {
-    width: 22px; height: 22px;
-    border-radius: 5px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    flex-shrink: 0;
-  }
-  .icon-blue  { background: #dbeafe; color: #1d4ed8; }
-  .icon-amber { background: #fef3c7; color: #92400e; }
-  .icon-green { background: #d1fae5; color: #065f46; }
-  .icon-red   { background: #fee2e2; color: #991b1b; }
+/* ─── TABS ───────────────────────────── */
+.tabs-bar {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 0 36px;
+  display: flex; gap: 0;
+}
+.tab {
+  padding: 11px 18px; background: none; border: none;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  color: var(--muted); font-family: var(--sans); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s; white-space: nowrap;
+}
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+.tab:hover:not(.active) { color: var(--text); }
 
-  .section-header h2 {
-    font-family: var(--sans);
-    font-size: 13px; font-weight: 600;
-    letter-spacing: 0.01em;
-    color: var(--label);
-  }
-  .section-header .badge {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    background: var(--border);
-    padding: 2px 8px;
-    border-radius: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
+/* ─── LAYOUT ─────────────────────────── */
+.wrapper {
+  max-width: 1380px; margin: 0 auto;
+  padding: 24px 36px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
 
-  .section-body { padding: 18px; }
+/* ─── PANEL ───────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+.panel:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.09); }
+.ph {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 15px;
+  display: flex; align-items: center; gap: 9px;
+}
+.phi {
+  width: 22px; height: 22px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+.ig { background: var(--green-light); color: var(--green); }
+.ie { background: var(--earth-light); color: var(--earth); }
+.is { background: var(--sky-light); color: var(--sky); }
+.iw { background: var(--warn-light); color: var(--warn); }
+.ir { background: var(--danger-light); color: var(--danger); }
 
-  /* ─── FIELD GROUPS ───────────────────────────── */
-  .field-group {
-    margin-bottom: 14px;
-  }
-  .field-group:last-child { margin-bottom: 0; }
+.ph h2 { font-size: 13px; font-weight: 600; color: var(--label); }
+.pbadge {
+  margin-left: auto; font-family: var(--mono); font-size: 9px;
+  color: var(--muted); background: var(--bg2);
+  border: 1px solid var(--border-s); padding: 2px 8px;
+  border-radius: 3px; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.pb { padding: 15px; }
 
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  .field-row:last-child { margin-bottom: 0; }
+/* ─── FORM ───────────────────────────── */
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 11px; }
+.frow3 { grid-template-columns: 1fr 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted);
+}
+label .uh { font-family: var(--mono); font-size: 9px; color: var(--green-mid); font-weight: 400; margin-left: 3px; }
+input[type="number"], select {
+  background: var(--surface); border: 1px solid var(--border-s);
+  border-radius: 6px; padding: 8px 10px;
+  font-family: var(--mono); font-size: 13px; color: var(--text);
+  width: 100%; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type="number"]:focus, select:focus {
+  border-color: var(--green); box-shadow: 0 0 0 3px rgba(45,106,45,0.12);
+}
+input[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
+select option { background: #fff; color: var(--text); }
+.divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.sublabel {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 9px;
+  display: flex; align-items: center; gap: 6px;
+}
+.sublabel::before { content: ''; width: 12px; height: 2px; background: var(--green-mid); border-radius: 1px; }
 
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+/* ─── BUTTONS ─────────────────────────── */
+.calc-btn {
+  width: 100%; padding: 12px;
+  background: var(--green); border: none; border-radius: 8px;
+  font-family: var(--sans); font-size: 14px; font-weight: 700;
+  color: #fff; cursor: pointer; transition: all 0.15s; margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(45,106,45,0.3);
+}
+.calc-btn:hover { background: var(--green-mid); box-shadow: 0 4px 14px rgba(45,106,45,0.4); }
+.calc-btn:active { transform: scale(0.98); }
+.reset-btn {
+  width: 100%; padding: 8px; background: none;
+  border: 1px solid var(--border-s); border-radius: 8px;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  color: var(--muted); cursor: pointer; margin-top: 8px; transition: all 0.15s;
+}
+.reset-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-pale); }
+.export-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; background: none;
+  border: 1px solid var(--border-s); border-radius: 6px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  cursor: pointer; transition: all 0.15s; margin-top: 4px;
+}
+.export-btn:hover { color: var(--green); border-color: var(--green); background: var(--green-pale); }
 
-  label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  label .formula {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--accent);
-    font-weight: 400;
-    margin-left: 4px;
-  }
+/* ─── OUTPUT CARDS ───────────────────── */
+.ogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.ogrid3 { grid-template-columns: 1fr 1fr 1fr; }
+.ocard {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 13px; position: relative; overflow: hidden;
+  cursor: default; transition: all 0.2s;
+}
+.ocard:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+.ocard::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--text); color: #fff;
+  font-family: var(--mono); font-size: 10px;
+  padding: 6px 10px; border-radius: 6px;
+  white-space: normal; text-align: center; line-height: 1.5;
+  max-width: 220px; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s; z-index: 50;
+}
+.ocard:hover::after { opacity: 1; }
 
-  input[type="number"], select {
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
-    border-radius: 6px;
-    padding: 9px 12px;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text);
-    width: 100%;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  input[type="number"]:focus, select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
-  }
-  input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+.ocard.cg { border-color: #b6d4b6; background: var(--green-pale); }
+.ocard.ce { border-color: #d4c4a0; background: var(--earth-light); }
+.ocard.cs { border-color: #a0c4d4; background: var(--sky-light); }
+.ocard.cw { border-color: #f0d080; background: var(--warn-light); }
+.ocard.cr { border-color: #f0a0b0; background: var(--danger-light); }
 
-  select option { background: var(--surface); color: var(--text); }
+.ocard .aline {
+  position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+}
+.ocard.cg .aline { background: linear-gradient(90deg, var(--green), transparent); }
+.ocard.ce .aline { background: linear-gradient(90deg, var(--earth), transparent); }
+.ocard.cs .aline { background: linear-gradient(90deg, var(--sky), transparent); }
+.ocard.cw .aline { background: linear-gradient(90deg, var(--warn), transparent); }
+.ocard.cr .aline { background: linear-gradient(90deg, var(--danger), transparent); }
 
-  /* ─── UNIT TOGGLE ────────────────────────────── */
-  .unit-toggle {
-    display: flex;
-    gap: 0;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-    margin-bottom: 18px;
-  }
-  .unit-toggle button {
-    flex: 1;
-    padding: 8px;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .unit-toggle button.active {
-    background: var(--accent);
-    color: #fff;
-  }
+.olabel { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.ovalue { font-family: var(--mono); font-size: 21px; font-weight: 600; line-height: 1; margin-bottom: 3px; transition: all 0.3s; }
+.ocard.cg .ovalue { color: var(--green); }
+.ocard.ce .ovalue { color: var(--earth); }
+.ocard.cs .ovalue { color: var(--sky); }
+.ocard.cw .ovalue { color: var(--warn); }
+.ocard.cr .ovalue { color: var(--danger); }
+.ounit   { font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.5; }
+.oformula{ font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 5px; opacity: 0.5; }
 
-  /* ─── DIVIDER ─────────────────────────────────── */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 16px 0;
-  }
-  .sub-label {
-    font-family: var(--sans);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
+/* ─── FORCE BARS ─────────────────────── */
+.fbreak { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; margin-bottom: 11px; }
+.fbreak h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.frow2 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 12px; }
+.fname { color: var(--label); font-weight: 500; }
+.fval  { font-family: var(--mono); font-size: 11px; color: var(--text); }
+.btrack { width: 100%; height: 5px; background: var(--border); border-radius: 3px; margin-top: 4px; margin-bottom: 11px; overflow: hidden; }
+.bfill  { height: 5px; border-radius: 3px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+.b1 { background: var(--green); }
+.b2 { background: var(--earth); }
+.b3 { background: var(--sky); }
+.b4 { background: #e07040; }
+.b5 { background: #9050c0; }
+.ftotal { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 9px; }
+.ftotal .fn { font-size: 13px; font-weight: 600; color: var(--text); }
+.ftotal .fv { font-family: var(--mono); font-size: 13px; color: var(--green); }
 
-  /* ─── CALCULATE BUTTON ───────────────────────── */
-  .calc-btn {
-    width: 100%;
-    padding: 13px;
-    background: var(--accent);
-    border: none;
-    border-radius: 8px;
-    font-family: var(--sans);
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-    margin-top: 6px;
-    box-shadow: 0 2px 6px rgba(26,86,219,0.3);
-  }
-  .calc-btn:hover { background: #1740a8; box-shadow: 0 4px 10px rgba(26,86,219,0.35); }
-  .calc-btn:active { transform: scale(0.98); }
+/* ─── STANDARDS TABLE ────────────────── */
+.stable { width: 100%; border-collapse: collapse; font-size: 12px; }
+.stable th {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); text-align: left; padding: 7px 10px;
+  border-bottom: 2px solid var(--border); background: var(--surface2);
+}
+.stable td { padding: 8px 10px; font-family: var(--mono); font-size: 11px; border-bottom: 1px solid var(--border); color: var(--muted); }
+.stable tr:last-child td { border-bottom: none; }
+.stable tr:hover td { background: var(--surface2); }
+.stable td:first-child { color: var(--text); font-family: var(--sans); font-size: 11px; font-weight: 600; }
+.sok  { color: #166534 !important; font-weight: 700 !important; }
+.swarn{ color: #92400e !important; font-weight: 700 !important; }
+.sbad { color: #9f1239 !important; font-weight: 700 !important; }
 
-  .reset-btn {
-    width: 100%;
-    padding: 10px;
-    background: none;
-    border: 1px solid var(--border-strong);
-    border-radius: 8px;
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    margin-top: 8px;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
-  }
-  .reset-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+/* ─── CHART ──────────────────────────── */
+.chartwrap { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px; margin-bottom: 11px; }
+.chartwrap h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+canvas { width: 100%; display: block; }
 
-  /* ─── OUTPUTS ─────────────────────────────────── */
-  .outputs-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .output-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .output-card.highlight { border-color: var(--accent); background: var(--accent-light); }
-  .output-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 100%;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .output-card.highlight::before { opacity: 1; }
+/* ─── NOTES ──────────────────────────── */
+.notes {
+  grid-column: 1/-1; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r); padding: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.notes h3 {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 13px; padding-bottom: 9px; border-bottom: 1px solid var(--border);
+}
+.ngrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.nitem { font-size: 12px; color: var(--muted); line-height: 1.7; font-family: var(--mono); }
+.nitem strong { display: block; font-family: var(--sans); font-size: 11px; color: var(--green); margin-bottom: 3px; font-weight: 700; }
 
-  .output-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .output-value {
-    font-family: var(--mono);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
-    margin-bottom: 4px;
-    transition: all 0.3s;
-  }
-  .output-unit {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .output-formula {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--accent);
-    margin-top: 6px;
-    opacity: 0.65;
-  }
+/* ─── TERRAIN BADGE ──────────────────── */
+.terrain-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  padding: 3px 10px; border-radius: 4px; margin-bottom: 10px;
+  background: var(--green-light); color: var(--green); border: 1px solid #b6d4b6;
+}
 
-  .output-card.warn .output-value { color: var(--danger); }
-  .output-card.warn::before { background: var(--danger); opacity: 1; }
-  .output-card.warn { border-color: var(--danger); background: var(--danger-light); }
+/* ─── PLACEHOLDER ────────────────────── */
+.placeholder { text-align: center; padding: 28px 20px; color: var(--muted); }
+.placeholder .icon { font-size: 24px; margin-bottom: 9px; opacity: 0.25; }
+.placeholder p { font-size: 12px; line-height: 1.7; }
 
-  /* ─── FORCE BREAKDOWN ────────────────────────── */
-  .force-breakdown {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-  }
-  .force-breakdown h3 {
-    font-family: var(--sans);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-  .force-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    font-size: 13px;
-  }
-  .force-name { color: var(--label); }
-  .force-val  { font-family: var(--mono); font-size: 12px; color: var(--text); }
-  .force-bar-track {
-    width: 100%;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    margin-top: 4px;
-    margin-bottom: 10px;
-  }
-  .force-bar {
-    height: 4px;
-    border-radius: 2px;
-    transition: width 0.4s ease;
-  }
-  .bar-accel  { background: #1a56db; }
-  .bar-grade  { background: #b45309; }
-  .bar-roll   { background: #057a55; }
-  .bar-aero   { background: #c81e1e; }
+/* ─── TOAST ──────────────────────────── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--green); color: #fff;
+  font-family: var(--mono); font-size: 12px;
+  padding: 10px 18px; border-radius: 8px;
+  transform: translateY(60px); opacity: 0;
+  transition: all 0.3s; z-index: 999; pointer-events: none;
+  box-shadow: 0 4px 16px rgba(45,106,45,0.4);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
 
-  .total-force {
-    display: flex; justify-content: space-between;
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-    font-weight: 600;
-  }
-  .total-force .name { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--label); }
-  .total-force .val  { font-family: var(--mono); font-size: 14px; color: var(--accent); }
+/* ─── ANIM ───────────────────────────── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+.ra { animation: fadeUp 0.3s ease both; }
+.ra:nth-child(2) { animation-delay:.04s; }
+.ra:nth-child(3) { animation-delay:.08s; }
+.ra:nth-child(4) { animation-delay:.12s; }
 
-  /* ─── STANDARD LIMITS TABLE ──────────────────── */
-  .limits-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-top: 8px;
-  }
-  .limits-table th {
-    font-family: var(--sans);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: left;
-    padding: 6px 10px;
-    border-bottom: 2px solid var(--border);
-    background: var(--surface2);
-  }
-  .limits-table td {
-    padding: 9px 10px;
-    font-family: var(--mono);
-    font-size: 11px;
-    border-bottom: 1px solid var(--border);
-    color: var(--muted);
-  }
-  .limits-table tr:last-child td { border-bottom: none; }
-  .limits-table tr:hover td { background: var(--surface2); }
-  .limits-table td:first-child { color: var(--text); font-size: 12px; font-family: var(--sans); font-weight: 500; }
-  .status-ok   { color: #065f46 !important; font-weight: 600 !important; }
-  .status-warn { color: #92400e !important; font-weight: 600 !important; }
-  .status-bad  { color: #991b1b !important; font-weight: 600 !important; }
+/* ─── TAB PAGES ──────────────────────── */
+.tab-page { display: none; }
+.tab-page.active { display: contents; }
+.full { grid-column: 1/-1; }
 
-  /* ─── FULL WIDTH SECTION ─────────────────────── */
-  .full-width { grid-column: 1 / -1; }
-
-  /* ─── PLACEHOLDER ────────────────────────────── */
-  .placeholder {
-    text-align: center;
-    padding: 36px 20px;
-    color: var(--muted);
-  }
-  .placeholder .icon { font-size: 28px; margin-bottom: 10px; opacity: 0.3; }
-  .placeholder p { font-size: 13px; line-height: 1.6; color: var(--muted); }
-
-  /* ─── FOOTER NOTES ───────────────────────────── */
-  .notes {
-    grid-column: 1 / -1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  .notes h3 {
-    font-family: var(--sans);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
-  .notes-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-  .note-item { font-size: 12px; color: var(--muted); line-height: 1.7; }
-  .note-item strong { display: block; font-family: var(--mono); font-size: 11px; color: var(--accent); margin-bottom: 4px; font-weight: 500; }
-
-  /* ─── ANIMATIONS ─────────────────────────────── */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .result-appear { animation: fadeIn 0.3s ease both; }
-
-  /* ─── RESPONSIVE ─────────────────────────────── */
-  @media (max-width: 900px) {
-    .wrapper { grid-template-columns: 1fr; padding: 20px; }
-    .full-width { grid-column: 1; }
-    .notes-grid { grid-template-columns: 1fr; }
-    header { padding: 16px 20px; }
-    header span { display: none; }
-  }
-  @media (max-width: 500px) {
-    .outputs-grid { grid-template-columns: 1fr; }
-    .field-row { grid-template-columns: 1fr; }
-  }
+/* ─── RESPONSIVE ─────────────────────── */
+@media (max-width: 980px) {
+  .wrapper { grid-template-columns:1fr; padding:16px 18px; }
+  .full, .notes { grid-column:1; }
+  .ngrid { grid-template-columns:1fr 1fr; }
+  header { padding:0 18px; }
+  .tabs-bar { padding:0 18px; overflow-x:auto; }
+}
+@media (max-width: 540px) {
+  .frow,.ogrid,.frow3,.ogrid3 { grid-template-columns:1fr; }
+  .ngrid { grid-template-columns:1fr; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-mark">V</div>
-  <h1>Vehicle Dynamics Calculator</h1>
-  <span>SAE / ISO Standards</span>
+  <div class="hlogo">
+    <div class="hlogo-icon">🌾</div>
+    <h1>Agri-AGV Dynamics<span>Agricultural Autonomous Ground Vehicle</span></h1>
+  </div>
+  <div class="hpills">
+    <span class="hpill live">Live Calc</span>
+    <span class="hpill">ASABE S296</span>
+    <span class="hpill">ISO 11684</span>
+    <span class="hpill">v1.0</span>
+  </div>
 </header>
 
+<div class="tabs-bar">
+  <button class="tab active" onclick="switchTab('traction',this)">🚜 Traction & Drive</button>
+  <button class="tab" onclick="switchTab('terrain',this)">🌱 Terrain & Soil</button>
+  <button class="tab" onclick="switchTab('power',this)">⚡ Power & Battery</button>
+  <button class="tab" onclick="switchTab('field',this)">📐 Field Operations</button>
+</div>
+
+<!-- ══════════ TAB 1: TRACTION & DRIVE ══════════ -->
+<div id="tab-traction" class="tab-page active">
 <div class="wrapper">
 
-  <!-- ─── LEFT: INPUTS ─────────────────────────── -->
+  <!-- LEFT INPUTS -->
   <div>
-    <!-- Unit system -->
-    <div class="section" style="margin-bottom:20px;">
-      <div class="section-header">
-        <div class="section-icon icon-amber">⚙</div>
-        <h2>Unit System</h2>
-      </div>
-      <div class="section-body" style="padding-bottom:16px;">
-        <div class="unit-toggle">
-          <button class="active" onclick="setUnits('si')">SI (metric)</button>
-          <button onclick="setUnits('imperial')">Imperial</button>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Vehicle type</label>
-            <select id="vehicle-type" onchange="applyPreset()">
-              <option value="custom">Custom</option>
-              <option value="car">Passenger car</option>
-              <option value="suv">SUV / Crossover</option>
-              <option value="truck">Light truck</option>
-              <option value="motorcycle">Motorcycle</option>
-              <option value="bus">Bus / Heavy</option>
-              <option value="evcar">Electric car</option>
-            </select>
-          </div>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="ph"><div class="phi ig">🚜</div><h2>AGV Configuration</h2></div>
+      <div class="pb">
+        <div class="frow">
           <div class="field">
             <label>Drive type</label>
-            <select id="drive-type">
-              <option value="rwd">RWD</option>
-              <option value="fwd">FWD</option>
-              <option value="awd">AWD</option>
-              <option value="4wd">4WD</option>
+            <select id="drive-type" onchange="calcTraction()">
+              <option value="4wd">4WD Wheeled</option>
+              <option value="tracked">Tracked (Crawler)</option>
+              <option value="skid">Skid Steer</option>
+              <option value="diff">Differential Drive</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Vehicle class</label>
+            <select id="agv-class" onchange="applyPreset(); calcTraction()">
+              <option value="custom">Custom</option>
+              <option value="micro">Micro (&lt;50 kg)</option>
+              <option value="small">Small (50–200 kg)</option>
+              <option value="medium">Medium (200–800 kg)</option>
+              <option value="large">Large (&gt;800 kg)</option>
             </select>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Vehicle Specs -->
-    <div class="section" style="margin-bottom:20px;">
-      <div class="section-header">
-        <div class="section-icon icon-blue">◈</div>
-        <h2>Vehicle Specifications</h2>
-        <span class="badge">Input</span>
-      </div>
-      <div class="section-body">
-        <p class="sub-label">Mass &amp; Geometry</p>
-        <div class="field-row">
-          <div class="field">
-            <label>Curb mass <span class="formula" id="lbl-mass-unit">(kg)</span></label>
-            <input type="number" id="mass" value="1500" min="1" step="10">
-          </div>
-          <div class="field">
-            <label>Payload / Load <span class="formula" id="lbl-load-unit">(kg)</span></label>
-            <input type="number" id="payload" value="200" min="0" step="10">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Wheel radius <span class="formula" id="lbl-radius-unit">(m)</span></label>
-            <input type="number" id="wheel-radius" value="0.32" min="0.01" step="0.01">
-          </div>
-          <div class="field">
-            <label>Frontal area <span class="formula" id="lbl-area-unit">(m²)</span></label>
-            <input type="number" id="frontal-area" value="2.2" min="0.1" step="0.1">
-          </div>
-        </div>
-
         <hr class="divider">
-        <p class="sub-label">Engine &amp; Drivetrain</p>
-        <div class="field-row">
-          <div class="field">
-            <label>Engine RPM <span class="formula">(rpm)</span></label>
-            <input type="number" id="rpm" value="4000" min="100" step="100">
-          </div>
-          <div class="field">
-            <label>Overall gear ratio</label>
-            <input type="number" id="gear-ratio" value="3.5" min="0.1" step="0.1">
-          </div>
+        <p class="sublabel">Mass & Geometry</p>
+        <div class="frow">
+          <div class="field"><label>AGV dry mass <span class="uh">(kg)</span></label><input type="number" id="agv-mass" value="250" min="1" step="5" oninput="calcTraction()"></div>
+          <div class="field"><label>Implement/tool mass <span class="uh">(kg)</span></label><input type="number" id="impl-mass" value="80" min="0" step="5" oninput="calcTraction()"></div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Drivetrain efficiency <span class="formula">(%)</span></label>
-            <input type="number" id="efficiency" value="88" min="50" max="100" step="1">
-          </div>
-          <div class="field">
-            <label>Number of driven wheels</label>
-            <input type="number" id="driven-wheels" value="2" min="1" max="4" step="1">
-          </div>
+        <div class="frow">
+          <div class="field"><label>Crop/payload mass <span class="uh">(kg)</span></label><input type="number" id="crop-mass" value="50" min="0" step="5" oninput="calcTraction()"></div>
+          <div class="field"><label>Wheel/sprocket radius <span class="uh">(m)</span></label><input type="number" id="wheel-r" value="0.28" min="0.05" step="0.01" oninput="calcTraction()"></div>
         </div>
-      </div>
-    </div>
-
-    <!-- Road Conditions -->
-    <div class="section" style="margin-bottom:20px;">
-      <div class="section-header">
-        <div class="section-icon icon-blue">⛰</div>
-        <h2>Road Conditions</h2>
-        <span class="badge">Input</span>
-      </div>
-      <div class="section-body">
-        <div class="field-row">
-          <div class="field">
-            <label>Grade / Slope <span class="formula">(°)</span></label>
-            <input type="number" id="grade-deg" value="0" min="-30" max="30" step="0.5">
-          </div>
-          <div class="field">
-            <label>Rolling resistance μ</label>
-            <input type="number" id="mu-roll" value="0.015" min="0.005" max="0.05" step="0.001">
-          </div>
+        <div class="frow">
+          <div class="field"><label>Track/tyre width <span class="uh">(m)</span></label><input type="number" id="tyre-w" value="0.35" min="0.05" step="0.01" oninput="calcTraction()"></div>
+          <div class="field"><label>Wheelbase <span class="uh">(m)</span></label><input type="number" id="wheelbase" value="1.2" min="0.2" step="0.05" oninput="calcTraction()"></div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Drag coefficient Cd</label>
-            <input type="number" id="cd" value="0.30" min="0.10" max="1.5" step="0.01">
-          </div>
-          <div class="field">
-            <label>Air density ρ <span class="formula">(kg/m³)</span></label>
-            <input type="number" id="rho" value="1.225" min="0.9" max="1.4" step="0.001">
-          </div>
+        <hr class="divider">
+        <p class="sublabel">Drive System</p>
+        <div class="frow">
+          <div class="field"><label>Motor rated RPM</label><input type="number" id="motor-rpm" value="3000" min="100" step="100" oninput="calcTraction()"></div>
+          <div class="field"><label>Gear ratio (total)</label><input type="number" id="gear-r" value="20" min="1" step="0.5" oninput="calcTraction()"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>Drivetrain efficiency <span class="uh">(%)</span></label><input type="number" id="dt-eff" value="85" min="50" max="99" step="1" oninput="calcTraction()"></div>
+          <div class="field"><label>No. of drive wheels/tracks</label><input type="number" id="n-driven" value="4" min="1" max="4" step="1" oninput="calcTraction()"></div>
         </div>
       </div>
     </div>
 
-    <!-- Performance Goals -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-icon icon-amber">▶</div>
-        <h2>Performance Goals</h2>
-        <span class="badge">Input</span>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="ph"><div class="phi ie">🌱</div><h2>Soil & Terrain</h2><span class="pbadge">Inputs</span></div>
+      <div class="pb">
+        <div class="frow">
+          <div class="field">
+            <label>Terrain type</label>
+            <select id="terrain" onchange="applyTerrain(); calcTraction()">
+              <option value="hard">Hard packed / Road</option>
+              <option value="grass">Dry grass / Turf</option>
+              <option value="tilled" selected>Tilled / Loose soil</option>
+              <option value="wet">Wet / Muddy field</option>
+              <option value="sand">Sandy soil</option>
+              <option value="paddy">Paddy / Waterlogged</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Field slope <span class="uh">(°)</span></label>
+            <input type="number" id="slope" value="3" min="-20" max="20" step="0.5" oninput="calcTraction()">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>Rolling resistance coeff. Cr</label><input type="number" id="cr" value="0.12" min="0.02" max="0.5" step="0.005" oninput="calcTraction()"></div>
+          <div class="field"><label>Soil thrust coeff. Ks</label><input type="number" id="ks" value="0.45" min="0.1" max="0.9" step="0.01" oninput="calcTraction()"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>Slip ratio target <span class="uh">(%)</span></label><input type="number" id="slip" value="15" min="0" max="50" step="1" oninput="calcTraction()"></div>
+          <div class="field"><label>Sinkage depth est. <span class="uh">(mm)</span></label><input type="number" id="sinkage" value="30" min="0" max="200" step="5" oninput="calcTraction()"></div>
+        </div>
       </div>
-      <div class="section-body">
-        <div class="field-row">
-          <div class="field">
-            <label>Target speed <span class="formula" id="lbl-speed-unit">(km/h)</span></label>
-            <input type="number" id="target-speed" value="120" min="0" step="5">
-          </div>
-          <div class="field">
-            <label>Acceleration <span class="formula">(m/s²)</span></label>
-            <input type="number" id="acceleration" value="2.0" min="0" max="20" step="0.1">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Tyre–road friction μ</label>
-            <input type="number" id="mu-tyre" value="0.85" min="0.1" max="1.4" step="0.01">
-          </div>
-          <div class="field">
-            <label>Weight bias on drive axle <span class="formula">(%)</span></label>
-            <input type="number" id="weight-bias" value="50" min="0" max="100" step="1">
-          </div>
-        </div>
+    </div>
 
-        <button class="calc-btn" onclick="calculate()">▶ Calculate</button>
-        <button class="reset-btn" onclick="resetAll()">Reset to defaults</button>
+    <div class="panel">
+      <div class="ph"><div class="phi is">▶</div><h2>Operating Conditions</h2><span class="pbadge">Inputs</span></div>
+      <div class="pb">
+        <div class="frow">
+          <div class="field"><label>Target field speed <span class="uh">(km/h)</span></label><input type="number" id="field-speed" value="4" min="0.5" max="20" step="0.5" oninput="calcTraction()"></div>
+          <div class="field"><label>Drawbar pull required <span class="uh">(N)</span></label><input type="number" id="drawbar" value="500" min="0" step="50" oninput="calcTraction()"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>Implement draught force <span class="uh">(N)</span></label><input type="number" id="draught" value="300" min="0" step="50" oninput="calcTraction()"></div>
+          <div class="field"><label>Tyre inflation / track tension</label>
+            <select id="tyre-cond" onchange="calcTraction()">
+              <option value="optimal">Optimal</option>
+              <option value="low">Low pressure / loose</option>
+              <option value="high">High pressure / tight</option>
+            </select>
+          </div>
+        </div>
+        <button class="calc-btn" onclick="calcTraction()">▶ Calculate</button>
+        <button class="reset-btn" onclick="resetAll()">↺ Reset defaults</button>
       </div>
     </div>
   </div>
 
-  <!-- ─── RIGHT: OUTPUTS ────────────────────────── -->
+  <!-- RIGHT OUTPUTS -->
   <div>
-    <div class="section" style="margin-bottom:20px;">
-      <div class="section-header">
-        <div class="section-icon icon-green">◎</div>
-        <h2>Primary Outputs</h2>
-        <span class="badge" id="output-badge">Awaiting input</span>
-      </div>
-      <div class="section-body" id="primary-outputs">
-        <div class="placeholder">
-          <div class="icon">⚡</div>
-          <p>Enter your vehicle parameters<br>and press <strong>Calculate</strong></p>
-        </div>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="ph"><div class="phi ig">◎</div><h2>Primary Outputs</h2><span class="pbadge" id="tb1">Awaiting</span></div>
+      <div class="pb" id="out-primary">
+        <div class="placeholder"><div class="icon">🚜</div><p>Enter AGV parameters — results update live</p></div>
       </div>
     </div>
 
-    <div class="section" style="margin-bottom:20px;">
-      <div class="section-header">
-        <div class="section-icon icon-amber">≡</div>
-        <h2>Force Breakdown</h2>
-        <span class="badge">Resistance analysis</span>
-      </div>
-      <div class="section-body" id="force-section">
-        <div class="placeholder">
-          <div class="icon">📊</div>
-          <p>Force breakdown will appear here</p>
-        </div>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="ph"><div class="phi ie">≡</div><h2>Tractive Force Breakdown</h2><span class="pbadge">ASABE S296</span></div>
+      <div class="pb" id="out-forces">
+        <div class="placeholder"><div class="icon">📊</div><p>Force analysis will appear here</p></div>
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-header">
-        <div class="section-icon icon-red">⚠</div>
-        <h2>Standards &amp; Limits Check</h2>
-        <span class="badge">SAE / ISO</span>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="ph"><div class="phi is">∿</div><h2>Torque vs Ground Speed</h2><span class="pbadge">Sweep</span></div>
+      <div class="pb" id="out-chart">
+        <div class="placeholder"><div class="icon">∿</div><p>Speed-torque curve appears after calculation</p></div>
       </div>
-      <div class="section-body" id="limits-section">
-        <div class="placeholder">
-          <div class="icon">✓</div>
-          <p>Validation results will appear here</p>
-        </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phi ir">⚠</div><h2>Standards & Safety Check</h2><span class="pbadge">ASABE / ISO</span></div>
+      <div class="pb" id="out-limits">
+        <div class="placeholder"><div class="icon">✓</div><p>Compliance check will appear here</p></div>
       </div>
     </div>
   </div>
 
-  <!-- ─── FULL WIDTH: REFERENCE FORMULAS ───────── -->
+  <!-- FORMULAS -->
   <div class="notes">
-    <h3>Reference Formulas (SAE J1526 / ISO 8855)</h3>
-    <div class="notes-grid">
-      <div class="note-item">
-        <strong>Tractive force</strong>
-        F_total = m·a + m·g·sin(θ) + μ_r·m·g·cos(θ) + ½·ρ·Cd·A·v²
-      </div>
-      <div class="note-item">
-        <strong>Wheel torque → Engine torque</strong>
-        τ_engine = (F_total × r_wheel) / (GR × η)
-      </div>
-      <div class="note-item">
-        <strong>Engine angular velocity</strong>
-        ω = 2π·RPM / 60 (rad/s)
-      </div>
-      <div class="note-item">
-        <strong>Engine power</strong>
-        P = τ_engine × ω &nbsp;&nbsp; [W] → [kW] ÷ 1000
-      </div>
-      <div class="note-item">
-        <strong>Vehicle speed from RPM</strong>
-        v = (2π·r·RPM) / (60·GR) &nbsp;[m/s]
-      </div>
-      <div class="note-item">
-        <strong>Traction limit (per axle)</strong>
-        F_traction_max = μ_tyre × m·g × weight_bias
-      </div>
+    <h3>Reference Formulas — ASABE S296.5 / ISO 11684 / Bekker Soil-Vehicle Mechanics</h3>
+    <div class="ngrid">
+      <div class="nitem"><strong>Total tractive resistance</strong>F_total = F_roll + F_grade + F_drawbar + F_slip + F_sinkage</div>
+      <div class="nitem"><strong>Soil thrust (Bekker)</strong>T_soil = W · Ks · (1 − e^(−slip/K)) where K = slip coeff.</div>
+      <div class="nitem"><strong>Rolling resistance (ASABE)</strong>F_roll = Cr · W · cos(θ) + b · z^(3/2) · L (b=soil deformation coeff)</div>
+      <div class="nitem"><strong>Motor torque at wheel</strong>τ_motor = (F_total · r) / (GR · η_dt)</div>
+      <div class="nitem"><strong>Actual ground speed</strong>v_actual = v_theoretical · (1 − slip/100)</div>
+      <div class="nitem"><strong>Ground contact pressure</strong>P_contact = W / (n · L · b_track)</div>
+      <div class="nitem"><strong>Drawbar efficiency</strong>η_db = F_drawbar · v / P_motor · 100%</div>
+      <div class="nitem"><strong>Traction coefficient</strong>μ_traction = F_drawbar / W_driven</div>
     </div>
   </div>
 
 </div>
+</div>
+
+<!-- ══════════ TAB 2: TERRAIN & SOIL ══════════ -->
+<div id="tab-terrain" class="tab-page">
+<div class="wrapper">
+
+  <div class="panel">
+    <div class="ph"><div class="phi ie">🌱</div><h2>Soil Properties</h2></div>
+    <div class="pb">
+      <p class="sublabel">Bekker Soil Parameters</p>
+      <div class="frow">
+        <div class="field"><label>Cohesion c <span class="uh">(kPa)</span></label><input type="number" id="s-c" value="5" min="0" max="100" step="0.5" oninput="calcSoil()"></div>
+        <div class="field"><label>Friction angle φ <span class="uh">(°)</span></label><input type="number" id="s-phi" value="25" min="0" max="45" step="1" oninput="calcSoil()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Bekker kc <span class="uh">(kN/m^n+1)</span></label><input type="number" id="s-kc" value="14" min="0" step="0.5" oninput="calcSoil()"></div>
+        <div class="field"><label>Bekker kφ <span class="uh">(kN/m^n+2)</span></label><input type="number" id="s-kphi" value="820" min="0" step="10" oninput="calcSoil()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Exponent n</label><input type="number" id="s-n" value="0.7" min="0.1" max="2" step="0.05" oninput="calcSoil()"></div>
+        <div class="field"><label>Soil density <span class="uh">(kg/m³)</span></label><input type="number" id="s-rho" value="1400" min="800" max="2000" step="50" oninput="calcSoil()"></div>
+      </div>
+      <hr class="divider">
+      <p class="sublabel">Moisture & Condition</p>
+      <div class="frow">
+        <div class="field"><label>Soil moisture <span class="uh">(%)</span></label><input type="number" id="s-moist" value="25" min="0" max="60" step="1" oninput="calcSoil()"></div>
+        <div class="field"><label>Penetration resistance <span class="uh">(kPa)</span></label><input type="number" id="s-pen" value="200" min="50" max="3000" step="50" oninput="calcSoil()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Crop row spacing <span class="uh">(m)</span></label><input type="number" id="row-sp" value="0.75" min="0.1" max="2" step="0.05" oninput="calcSoil()"></div>
+        <div class="field"><label>Soil tillage depth <span class="uh">(mm)</span></label><input type="number" id="till-d" value="150" min="0" max="400" step="10" oninput="calcSoil()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="soil-results">
+    <div class="ph"><div class="phi ig">◎</div><h2>Soil-Vehicle Interaction Results</h2></div>
+    <div class="pb">
+      <div class="placeholder"><div class="icon">🌱</div><p>Fill soil parameters to see interaction results</p></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="phi is">📐</div><h2>Terrain Profiles</h2></div>
+    <div class="pb">
+      <p class="sublabel">Quick terrain presets</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <button onclick="setTerrain('hard')"   style="padding:8px;border:1px solid var(--border-s);border-radius:6px;background:var(--surface2);font-family:var(--sans);font-size:12px;color:var(--label);cursor:pointer;">🛣️ Hard packed</button>
+        <button onclick="setTerrain('grass')"  style="padding:8px;border:1px solid var(--border-s);border-radius:6px;background:var(--surface2);font-family:var(--sans);font-size:12px;color:var(--label);cursor:pointer;">🌿 Dry grass</button>
+        <button onclick="setTerrain('tilled')" style="padding:8px;border:1px solid var(--border-s);border-radius:6px;background:var(--surface2);font-family:var(--sans);font-size:12px;color:var(--label);cursor:pointer;">🌾 Tilled soil</button>
+        <button onclick="setTerrain('wet')"    style="padding:8px;border:1px solid var(--border-s);border-radius:6px;background:var(--surface2);font-family:var(--sans);font-size:12px;color:var(--label);cursor:pointer;">💧 Wet/muddy</button>
+        <button onclick="setTerrain('sand')"   style="padding:8px;border:1px solid var(--border-s);border-radius:6px;background:var(--surface2);font-family:var(--sans);font-size:12px;color:var(--label);cursor:pointer;">🏜️ Sandy soil</button>
+        <button onclick="setTerrain('paddy')"  style="padding:8px;border:1px solid var(--border-s);border-radius:6px;background:var(--surface2);font-family:var(--sans);font-size:12px;color:var(--label);cursor:pointer;">🌊 Paddy field</button>
+      </div>
+      <p class="sublabel">Wheel / track contact area</p>
+      <div class="frow">
+        <div class="field"><label>Contact length <span class="uh">(m)</span></label><input type="number" id="cl" value="0.35" min="0.05" step="0.01" oninput="calcSoil()"></div>
+        <div class="field"><label>Contact width <span class="uh">(m)</span></label><input type="number" id="cw" value="0.30" min="0.05" step="0.01" oninput="calcSoil()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="soil-chart-panel">
+    <div class="ph"><div class="phi ie">∿</div><h2>Sinkage vs Load Curve</h2></div>
+    <div class="pb">
+      <div class="placeholder"><div class="icon">📉</div><p>Sinkage curve will appear after calculation</p></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════ TAB 3: POWER & BATTERY ══════════ -->
+<div id="tab-power" class="tab-page">
+<div class="wrapper">
+
+  <div class="panel">
+    <div class="ph"><div class="phi is">⚡</div><h2>Power System Inputs</h2></div>
+    <div class="pb">
+      <p class="sublabel">Battery / Energy Source</p>
+      <div class="frow">
+        <div class="field">
+          <label>Power source</label>
+          <select id="power-src" onchange="calcPower()">
+            <option value="liion">Li-Ion battery</option>
+            <option value="lifepo">LiFePO₄ battery</option>
+            <option value="lead">Lead-acid battery</option>
+            <option value="fuel">Fuel cell (H₂)</option>
+            <option value="hybrid">Hybrid (battery + ICE)</option>
+          </select>
+        </div>
+        <div class="field"><label>Battery voltage <span class="uh">(V)</span></label><input type="number" id="batt-v" value="48" min="12" max="800" step="4" oninput="calcPower()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Battery capacity <span class="uh">(Ah)</span></label><input type="number" id="batt-ah" value="100" min="1" step="5" oninput="calcPower()"></div>
+        <div class="field"><label>Usable SOC <span class="uh">(%)</span></label><input type="number" id="batt-soc" value="80" min="20" max="100" step="1" oninput="calcPower()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Battery C-rate (discharge)</label><input type="number" id="c-rate" value="1" min="0.1" max="5" step="0.1" oninput="calcPower()"></div>
+        <div class="field"><label>Battery efficiency <span class="uh">(%)</span></label><input type="number" id="batt-eff" value="92" min="70" max="99" step="1" oninput="calcPower()"></div>
+      </div>
+      <hr class="divider">
+      <p class="sublabel">Motor System</p>
+      <div class="frow">
+        <div class="field"><label>Motor type</label>
+          <select id="motor-type" onchange="calcPower()">
+            <option value="bldc">BLDC</option>
+            <option value="pmsm">PMSM</option>
+            <option value="dc">DC brush</option>
+            <option value="srm">SRM</option>
+          </select>
+        </div>
+        <div class="field"><label>Motor rated power <span class="uh">(W)</span></label><input type="number" id="motor-pw" value="2000" min="100" step="100" oninput="calcPower()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Motor efficiency <span class="uh">(%)</span></label><input type="number" id="motor-eff" value="88" min="50" max="98" step="1" oninput="calcPower()"></div>
+        <div class="field"><label>Controller efficiency <span class="uh">(%)</span></label><input type="number" id="ctrl-eff" value="95" min="70" max="99" step="1" oninput="calcPower()"></div>
+      </div>
+      <hr class="divider">
+      <p class="sublabel">Ancillary Loads</p>
+      <div class="frow">
+        <div class="field"><label>Sensors / compute <span class="uh">(W)</span></label><input type="number" id="p-sensors" value="80" min="0" step="5" oninput="calcPower()"></div>
+        <div class="field"><label>Implement actuators <span class="uh">(W)</span></label><input type="number" id="p-impl" value="200" min="0" step="10" oninput="calcPower()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Comms / GPS / RTK <span class="uh">(W)</span></label><input type="number" id="p-comms" value="25" min="0" step="5" oninput="calcPower()"></div>
+        <div class="field"><label>Field speed for runtime <span class="uh">(km/h)</span></label><input type="number" id="p-speed" value="4" min="0.5" max="20" step="0.5" oninput="calcPower()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="power-results">
+    <div class="ph"><div class="phi ig">⚡</div><h2>Power & Runtime Results</h2></div>
+    <div class="pb">
+      <div class="placeholder"><div class="icon">⚡</div><p>Fill power parameters to see results</p></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════ TAB 4: FIELD OPERATIONS ══════════ -->
+<div id="tab-field" class="tab-page">
+<div class="wrapper">
+
+  <div class="panel">
+    <div class="ph"><div class="phi ig">📐</div><h2>Field & Mission Parameters</h2></div>
+    <div class="pb">
+      <p class="sublabel">Field Geometry</p>
+      <div class="frow">
+        <div class="field"><label>Field length <span class="uh">(m)</span></label><input type="number" id="f-len" value="200" min="10" step="10" oninput="calcField()"></div>
+        <div class="field"><label>Field width <span class="uh">(m)</span></label><input type="number" id="f-wid" value="100" min="10" step="10" oninput="calcField()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Implement working width <span class="uh">(m)</span></label><input type="number" id="impl-w" value="1.5" min="0.1" step="0.1" oninput="calcField()"></div>
+        <div class="field"><label>Overlap <span class="uh">(%)</span></label><input type="number" id="overlap" value="5" min="0" max="30" step="1" oninput="calcField()"></div>
+      </div>
+      <hr class="divider">
+      <p class="sublabel">Turning & Headland</p>
+      <div class="frow">
+        <div class="field">
+          <label>Turning mode</label>
+          <select id="turn-mode" onchange="calcField()">
+            <option value="utype">U-turn (headland)</option>
+            <option value="fishtail">Fishtail turn</option>
+            <option value="pivot">Pivot / spin</option>
+            <option value="teardrop">Teardrop</option>
+          </select>
+        </div>
+        <div class="field"><label>Min turn radius <span class="uh">(m)</span></label><input type="number" id="turn-r" value="1.8" min="0.1" step="0.1" oninput="calcField()"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Headland width <span class="uh">(m)</span></label><input type="number" id="headland" value="4" min="1" step="0.5" oninput="calcField()"></div>
+        <div class="field"><label>Target field speed <span class="uh">(km/h)</span></label><input type="number" id="ff-speed" value="4" min="0.5" max="15" step="0.5" oninput="calcField()"></div>
+      </div>
+      <hr class="divider">
+      <p class="sublabel">Mission</p>
+      <div class="frow">
+        <div class="field">
+          <label>Operation type</label>
+          <select id="op-type" onchange="calcField()">
+            <option value="spray">Spraying</option>
+            <option value="seed">Seeding</option>
+            <option value="harvest">Harvesting</option>
+            <option value="mow">Mowing</option>
+            <option value="till">Tilling / Cultivating</option>
+            <option value="survey">Survey / Scouting</option>
+          </select>
+        </div>
+        <div class="field"><label>Working hours per day <span class="uh">(h)</span></label><input type="number" id="work-h" value="8" min="1" max="24" step="0.5" oninput="calcField()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="field-results">
+    <div class="ph"><div class="phi ig">📐</div><h2>Field Operation Results</h2></div>
+    <div class="pb">
+      <div class="placeholder"><div class="icon">📐</div><p>Fill field parameters to calculate coverage</p></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// ─── STATE ────────────────────────────────────────
-let units = 'si';
+const g = 9.81;
 
-const PRESETS = {
-  car:        { mass:1400, payload:160, radius:0.315, area:2.1, rpm:4500, gear:3.5, cd:0.28, mu_roll:0.012, eff:88 },
-  suv:        { mass:2000, payload:300, radius:0.360, area:2.8, rpm:3500, gear:3.2, cd:0.35, mu_roll:0.015, eff:85 },
-  truck:      { mass:2500, payload:800, radius:0.400, area:3.2, rpm:3000, gear:4.5, cd:0.45, mu_roll:0.018, eff:82 },
-  motorcycle: { mass:220,  payload:100, radius:0.300, area:0.8, rpm:7000, gear:4.0, cd:0.55, mu_roll:0.010, eff:90 },
-  bus:        { mass:8000, payload:5000,radius:0.520, area:7.0, rpm:2500, gear:5.0, cd:0.60, mu_roll:0.020, eff:80 },
-  evcar:      { mass:1800, payload:200, radius:0.330, area:2.3, rpm:8000, gear:9.5, cd:0.23, mu_roll:0.011, eff:95 },
+// ─── TERRAIN PRESETS ──────────────────────────────
+const TERRAINS = {
+  hard:   { cr:0.03, ks:0.75, slip:5,  sink:5,   kc:200, kphi:2000, n:0.5, phi:35, c:0   },
+  grass:  { cr:0.06, ks:0.65, slip:8,  sink:10,  kc:40,  kphi:1100, n:0.6, phi:30, c:2   },
+  tilled: { cr:0.12, ks:0.45, slip:15, sink:30,  kc:14,  kphi:820,  n:0.7, phi:25, c:5   },
+  wet:    { cr:0.22, ks:0.30, slip:25, sink:60,  kc:5,   kphi:300,  n:0.8, phi:15, c:8   },
+  sand:   { cr:0.15, ks:0.35, slip:20, sink:45,  kc:3,   kphi:150,  n:1.1, phi:20, c:1   },
+  paddy:  { cr:0.30, ks:0.20, slip:35, sink:100, kc:2,   kphi:100,  n:1.0, phi:10, c:12  },
 };
 
-// ─── UNITS ───────────────────────────────────────
-function setUnits(u) {
-  units = u;
-  document.querySelectorAll('.unit-toggle button').forEach((b,i) => {
-    b.classList.toggle('active', (i===0 && u==='si') || (i===1 && u==='imperial'));
-  });
-  if (u === 'si') {
-    document.getElementById('lbl-mass-unit').textContent   = '(kg)';
-    document.getElementById('lbl-load-unit').textContent   = '(kg)';
-    document.getElementById('lbl-radius-unit').textContent = '(m)';
-    document.getElementById('lbl-area-unit').textContent   = '(m²)';
-    document.getElementById('lbl-speed-unit').textContent  = '(km/h)';
-  } else {
-    document.getElementById('lbl-mass-unit').textContent   = '(lb)';
-    document.getElementById('lbl-load-unit').textContent   = '(lb)';
-    document.getElementById('lbl-radius-unit').textContent = '(in)';
-    document.getElementById('lbl-area-unit').textContent   = '(ft²)';
-    document.getElementById('lbl-speed-unit').textContent  = '(mph)';
-  }
+const AGV_PRESETS = {
+  micro:  { mass:30,  impl:10, crop:5,  r:0.15, tw:0.15, wb:0.6,  rpm:5000, gr:15, eff:82, nd:2 },
+  small:  { mass:100, impl:30, crop:20, r:0.20, tw:0.25, wb:0.9,  rpm:4000, gr:18, eff:84, nd:2 },
+  medium: { mass:250, impl:80, crop:50, r:0.28, tw:0.35, wb:1.2,  rpm:3000, gr:20, eff:85, nd:4 },
+  large:  { mass:800, impl:200,crop:150,r:0.40, tw:0.50, wb:1.8,  rpm:2000, gr:25, eff:82, nd:4 },
+};
+
+// ─── TAB SWITCH ──────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
 }
 
+// ─── TERRAIN PRESET APPLY ────────────────────────
+function applyTerrain() {
+  const t = document.getElementById('terrain').value;
+  if (t === 'custom') return;
+  const p = TERRAINS[t]; if (!p) return;
+  document.getElementById('cr').value    = p.cr;
+  document.getElementById('ks').value    = p.ks;
+  document.getElementById('slip').value  = p.slip;
+  document.getElementById('sinkage').value = p.sink;
+}
+
+function setTerrain(t) {
+  document.getElementById('terrain').value = t;
+  applyTerrain();
+  const p = TERRAINS[t]; if (!p) return;
+  document.getElementById('s-kc').value  = p.kc;
+  document.getElementById('s-kphi').value= p.kphi;
+  document.getElementById('s-n').value   = p.n;
+  document.getElementById('s-phi').value = p.phi;
+  document.getElementById('s-c').value   = p.c;
+  calcSoil();
+}
+
+// ─── AGV PRESET ──────────────────────────────────
 function applyPreset() {
-  const v = document.getElementById('vehicle-type').value;
+  const v = document.getElementById('agv-class').value;
   if (v === 'custom') return;
-  const p = PRESETS[v];
-  if (!p) return;
-  const conv = units === 'imperial';
-  document.getElementById('mass').value         = conv ? +(p.mass*2.20462).toFixed(0) : p.mass;
-  document.getElementById('payload').value      = conv ? +(p.payload*2.20462).toFixed(0) : p.payload;
-  document.getElementById('wheel-radius').value = conv ? +(p.radius*39.3701).toFixed(1) : p.radius;
-  document.getElementById('frontal-area').value = conv ? +(p.area*10.7639).toFixed(2) : p.area;
-  document.getElementById('rpm').value          = p.rpm;
-  document.getElementById('gear-ratio').value   = p.gear;
-  document.getElementById('cd').value           = p.cd;
-  document.getElementById('mu-roll').value      = p.mu_roll;
-  document.getElementById('efficiency').value   = p.eff;
+  const p = AGV_PRESETS[v]; if (!p) return;
+  document.getElementById('agv-mass').value  = p.mass;
+  document.getElementById('impl-mass').value = p.impl;
+  document.getElementById('crop-mass').value = p.crop;
+  document.getElementById('wheel-r').value   = p.r;
+  document.getElementById('tyre-w').value    = p.tw;
+  document.getElementById('wheelbase').value = p.wb;
+  document.getElementById('motor-rpm').value = p.rpm;
+  document.getElementById('gear-r').value    = p.gr;
+  document.getElementById('dt-eff').value    = p.eff;
+  document.getElementById('n-driven').value  = p.nd;
 }
 
-// ─── GET INPUTS (always returns SI internally) ────
-function getInputs() {
-  const raw = (id) => parseFloat(document.getElementById(id).value) || 0;
-  let mass   = raw('mass');
-  let load   = raw('payload');
-  let radius = raw('wheel-radius');
-  let area   = raw('frontal-area');
-  let speed  = raw('target-speed');
+// ─── HELPERS ─────────────────────────────────────
+const rv = id => parseFloat(document.getElementById(id).value) || 0;
 
-  if (units === 'imperial') {
-    mass   = mass   / 2.20462;      // lb → kg
-    load   = load   / 2.20462;
-    radius = radius / 39.3701;      // in → m
-    area   = area   / 10.7639;      // ft² → m²
-    speed  = speed  * 0.44704;      // mph → m/s
-  } else {
-    speed  = speed  / 3.6;          // km/h → m/s
-  }
+// ─── TRACTION CALC ────────────────────────────────
+function calcTraction() {
+  const m_agv  = rv('agv-mass');
+  const m_impl = rv('impl-mass');
+  const m_crop = rv('crop-mass');
+  const m_total = m_agv + m_impl + m_crop;
+  const W = m_total * g;
 
-  return {
-    mass_total: mass + load,
-    mass, load,
-    radius,
-    area,
-    speed_ms: speed,
-    rpm:       raw('rpm'),
-    gr:        raw('gear-ratio'),
-    eff:       raw('efficiency') / 100,
-    rho:       raw('rho'),
-    cd:        raw('cd'),
-    mu_roll:   raw('mu-roll'),
-    mu_tyre:   raw('mu-tyre'),
-    accel:     raw('acceleration'),
-    grade_deg: raw('grade-deg'),
-    weight_bias: raw('weight-bias') / 100,
-    driven:    parseInt(raw('driven-wheels')),
-  };
-}
+  const r      = rv('wheel-r');
+  const wb     = rv('wheelbase');
+  const tw     = rv('tyre-w');
+  const rpm    = rv('motor-rpm');
+  const gr     = rv('gear-r');
+  const eff    = rv('dt-eff') / 100;
+  const nd     = rv('n-driven');
+  const Cr     = rv('cr');
+  const Ks     = rv('ks');
+  const slip_pct = rv('slip');
+  const z      = rv('sinkage') / 1000;     // m
+  const slope  = rv('slope');
+  const drawbar= rv('drawbar');
+  const draught= rv('draught');
+  const v_target = rv('field-speed') / 3.6; // m/s
 
-// ─── CORE CALCULATIONS ────────────────────────────
-function calculate() {
-  const i = getInputs();
-  const g = 9.81;
+  const theta = slope * Math.PI / 180;
+  const sin_t = Math.sin(theta);
+  const cos_t = Math.cos(theta);
 
-  // Total mass
-  const m = i.mass_total;
-  const W = m * g;  // total weight (N)
+  // ── Forces ────────────────────────────────────
+  // Rolling resistance (ASABE S296: Cr·W·cos(θ) + sinkage term)
+  const F_roll = Cr * W * cos_t + 800 * Math.pow(z, 1.5) * tw * nd;
 
-  // Grade
-  const theta = i.grade_deg * Math.PI / 180;
-  const sin_theta = Math.sin(theta);
-  const cos_theta = Math.cos(theta);
+  // Grade force
+  const F_grade = W * sin_t;
 
-  // Resistance forces
-  const F_accel = m * i.accel;
-  const F_grade = m * g * sin_theta;
-  const F_roll  = i.mu_roll * m * g * cos_theta;
-  const F_aero  = 0.5 * i.rho * i.cd * i.area * i.speed_ms * i.speed_ms;
-  const F_total = F_accel + F_grade + F_roll + F_aero;
+  // Sinkage extra resistance (Wismer & Luth, simplified)
+  const F_sink = 0.5 * 9800 * tw * z * z * nd;
 
-  // Wheel torque
-  const tau_wheel = F_total * i.radius;
+  // Drawbar + draught from implement
+  const F_db = drawbar + draught;
 
-  // Engine angular velocity
-  const omega = (2 * Math.PI * i.rpm) / 60;
+  // Slip resistance — additional force needed due to slip
+  const F_slip = F_roll * (slip_pct / 100) * 0.8;
 
-  // Engine torque required
-  const tau_engine = tau_wheel / (i.gr * i.eff);
+  // Total tractive force required
+  const F_total = F_roll + F_grade + F_sink + F_db + F_slip;
 
-  // Engine power required
-  const P_required = tau_engine * omega;     // W
-  const P_kW = P_required / 1000;
-  const P_hp = P_kW * 1.34102;
+  // ── Wheel / Motor ─────────────────────────────
+  const omega_motor = (2 * Math.PI * rpm) / 60;
+  const omega_wheel = omega_motor / gr;
+  const v_theoretical = omega_wheel * r;      // m/s (no slip)
+  const v_actual = v_theoretical * (1 - slip_pct / 100);   // m/s
 
-  // Vehicle speed from RPM
-  const v_rpm_ms = (2 * Math.PI * i.radius * i.rpm) / (60 * i.gr);
-  const v_rpm_kmh = v_rpm_ms * 3.6;
-  const v_rpm_mph = v_rpm_ms * 2.23694;
+  // Torque at wheel
+  const tau_wheel = F_total * r;
+  // Motor torque required
+  const tau_motor = tau_wheel / (gr * eff);
+  // Motor power
+  const P_motor = tau_motor * omega_motor;
 
-  // Target speed display
-  const v_kmh = i.speed_ms * 3.6;
-  const v_mph = i.speed_ms * 2.23694;
+  // ── Traction coefficient ─────────────────────
+  const W_driven = W * (nd / 4);  // approx driven weight
+  const mu_traction = F_db / Math.max(W_driven, 1);
 
-  // Traction limit
-  const F_traction_max = i.mu_tyre * m * g * i.weight_bias;
+  // ── Ground contact pressure ──────────────────
+  const driveType = document.getElementById('drive-type').value;
+  const contact_area = driveType === 'tracked'
+    ? wb * tw * nd            // track contact
+    : Math.PI * r * 0.2 * tw * nd;  // approx wheel contact ellipse
+  const GCP = W / Math.max(contact_area, 0.01) / 1000; // kPa
 
-  // Slip check
-  const traction_ok = F_total <= F_traction_max;
+  // ── Drawbar efficiency ───────────────────────
+  const P_drawbar = F_db * v_actual;
+  const eta_db = P_motor > 0 ? (P_drawbar / P_motor * 100) : 0;
 
-  // Power-to-weight (kW/tonne)
-  const pw_ratio = P_kW / (m / 1000);
+  // ── 0→target speed time ─────────────────────
+  const a_net = (F_total - F_roll - F_grade) / Math.max(m_total, 1);
+  const t_accel = v_target > 0 && a_net > 0 ? v_target / a_net : Infinity;
 
-  // Torque from RPM at wheel (output)
-  const tau_at_wheel_from_rpm = tau_engine * i.gr * i.eff;
-
-  // Render
-  renderOutputs({
-    F_accel, F_grade, F_roll, F_aero, F_total,
-    tau_wheel, tau_engine,
-    P_kW, P_hp,
-    omega, v_rpm_ms, v_rpm_kmh, v_rpm_mph,
-    v_kmh, v_mph,
-    F_traction_max, traction_ok,
-    pw_ratio, m, i
+  renderTraction({
+    F_roll, F_grade, F_sink, F_db, F_slip, F_total,
+    tau_wheel, tau_motor, P_motor,
+    v_theoretical, v_actual,
+    omega_motor, omega_wheel,
+    mu_traction, GCP, eta_db, t_accel,
+    m_total, W, r, gr, eff, slip_pct
   });
+  renderTorqueChart(rv('motor-rpm'), r, gr, eff, rv('cr'), m_total, rv('slope'), rv('drawbar') + rv('draught'));
+  renderLimits({ F_total, tau_motor, P_motor, v_actual, GCP, mu_traction, eta_db, slip_pct, m_total, slope });
 }
 
-// ─── RENDER ──────────────────────────────────────
-function renderOutputs(r) {
-  const i = r.i;
-  const u = units === 'si';
-  document.getElementById('output-badge').textContent = '✓ Calculated';
-
-  // Primary outputs
-  document.getElementById('primary-outputs').innerHTML = `
-    <div class="outputs-grid result-appear">
-      <div class="output-card highlight">
-        <div class="output-label">Engine torque required</div>
-        <div class="output-value">${r.tau_engine.toFixed(1)}</div>
-        <div class="output-unit">N·m &nbsp;|&nbsp; ${(r.tau_engine * 0.7376).toFixed(1)} lb·ft</div>
-        <div class="output-formula">τ_eng = F·r / (GR·η)</div>
+// ─── RENDER TRACTION ─────────────────────────────
+function renderTraction(r) {
+  document.getElementById('tb1').textContent = '✓ Live';
+  document.getElementById('out-primary').innerHTML = `
+    <div class="ogrid ra">
+      <div class="ocard cg" data-tip="Torque each motor must produce. τ = F·r / (GR·η)">
+        <div class="aline"></div><div class="olabel">Motor Torque Required</div>
+        <div class="ovalue">${r.tau_motor.toFixed(1)}</div>
+        <div class="ounit">N·m &nbsp;|&nbsp; ${(r.tau_motor*0.7376).toFixed(1)} lb·ft</div>
+        <div class="oformula">τ = F·r / (GR·η)</div>
       </div>
-      <div class="output-card highlight">
-        <div class="output-label">Engine power required</div>
-        <div class="output-value">${r.P_kW.toFixed(1)}</div>
-        <div class="output-unit">kW &nbsp;|&nbsp; ${r.P_hp.toFixed(1)} hp</div>
-        <div class="output-formula">P = τ · ω</div>
+      <div class="ocard ce" data-tip="Total electrical power the motor system must draw to achieve target tractive force.">
+        <div class="aline"></div><div class="olabel">Motor Power Required</div>
+        <div class="ovalue">${(r.P_motor/1000).toFixed(2)}</div>
+        <div class="ounit">kW &nbsp;|&nbsp; ${(r.P_motor/745.7).toFixed(2)} hp</div>
+        <div class="oformula">P = τ · ω</div>
       </div>
-      <div class="output-card highlight">
-        <div class="output-label">Vehicle speed from RPM</div>
-        <div class="output-value">${r.v_rpm_kmh.toFixed(1)}</div>
-        <div class="output-unit">km/h &nbsp;|&nbsp; ${r.v_rpm_mph.toFixed(1)} mph</div>
-        <div class="output-formula">v = 2πr·RPM / (60·GR)</div>
+      <div class="ocard cs" data-tip="Actual wheel hub rotational speed and resulting ground speed accounting for slip.">
+        <div class="aline"></div><div class="olabel">Actual Ground Speed</div>
+        <div class="ovalue">${(r.v_actual*3.6).toFixed(2)}</div>
+        <div class="ounit">km/h &nbsp;|&nbsp; theoretical: ${(r.v_theoretical*3.6).toFixed(2)} km/h</div>
+        <div class="oformula">v = v_th · (1 − slip)</div>
       </div>
-      <div class="output-card highlight">
-        <div class="output-label">Total tractive force</div>
-        <div class="output-value">${r.F_total.toFixed(0)}</div>
-        <div class="output-unit">N &nbsp;|&nbsp; ${(r.F_total * 0.2248).toFixed(0)} lbf</div>
-        <div class="output-formula">F = ma + grade + roll + aero</div>
+      <div class="ocard cg" data-tip="Sum of all resistance forces the drive system must overcome including terrain, slope, slip, and implement.">
+        <div class="aline"></div><div class="olabel">Total Tractive Force</div>
+        <div class="ovalue">${r.F_total.toFixed(0)}</div>
+        <div class="ounit">N &nbsp;|&nbsp; ${(r.F_total/1000).toFixed(3)} kN</div>
+        <div class="oformula">roll + grade + sink + drawbar + slip</div>
       </div>
-      <div class="output-card highlight">
-        <div class="output-label">Wheel torque</div>
-        <div class="output-value">${r.tau_wheel.toFixed(1)}</div>
-        <div class="output-unit">N·m &nbsp;|&nbsp; ${(r.tau_wheel * 0.7376).toFixed(1)} lb·ft</div>
-        <div class="output-formula">τ_wheel = F · r</div>
+      <div class="ocard ce" data-tip="Torque delivered at the wheel hub = motor torque × gear ratio × efficiency.">
+        <div class="aline"></div><div class="olabel">Wheel Torque</div>
+        <div class="ovalue">${r.tau_wheel.toFixed(1)}</div>
+        <div class="ounit">N·m &nbsp;|&nbsp; per driven wheel: ${(r.tau_wheel/Math.max(rv('n-driven'),1)).toFixed(1)} N·m</div>
+        <div class="oformula">τ_wheel = F · r</div>
       </div>
-      <div class="output-card highlight">
-        <div class="output-label">Angular velocity ω</div>
-        <div class="output-value">${r.omega.toFixed(1)}</div>
-        <div class="output-unit">rad/s &nbsp;|&nbsp; ${i.rpm} RPM</div>
-        <div class="output-formula">ω = 2π·RPM / 60</div>
+      <div class="ocard cs" data-tip="Ground contact pressure — must stay below soil bearing capacity to prevent compaction damage.">
+        <div class="aline"></div><div class="olabel">Ground Contact Pressure</div>
+        <div class="ovalue">${r.GCP.toFixed(1)}</div>
+        <div class="ounit">kPa &nbsp;|&nbsp; ${(r.GCP*0.145).toFixed(2)} psi</div>
+        <div class="oformula">W / (n · A_contact)</div>
       </div>
-      <div class="output-card highlight">
-        <div class="output-label">Max traction force</div>
-        <div class="output-value">${r.F_traction_max.toFixed(0)}</div>
-        <div class="output-unit">N &nbsp;|&nbsp; μ_tyre · W · bias</div>
-        <div class="output-formula">${r.traction_ok ? '✓ No wheel spin' : '⚠ Traction limit exceeded'}</div>
+      <div class="ocard ${r.mu_traction < 0.5 ? 'cg' : r.mu_traction < 0.7 ? 'cw' : 'cr'}" data-tip="Ratio of drawbar pull to driven wheel weight. Should be below soil traction coefficient for no slip.">
+        <div class="aline"></div><div class="olabel">Traction Coefficient μ</div>
+        <div class="ovalue">${r.mu_traction.toFixed(3)}</div>
+        <div class="ounit">${r.mu_traction < 0.5 ? '✓ Good traction' : r.mu_traction < 0.7 ? '⚠ Marginal' : '✗ Slip likely'}</div>
+        <div class="oformula">F_drawbar / W_driven</div>
       </div>
-      <div class="output-card highlight">
-        <div class="output-label">Power-to-weight ratio</div>
-        <div class="output-value">${r.pw_ratio.toFixed(1)}</div>
-        <div class="output-unit">kW/tonne &nbsp;|&nbsp; ${(r.pw_ratio * 0.746).toFixed(1)} hp/tonne</div>
-        <div class="output-formula">P / (m / 1000)</div>
+      <div class="ocard cs" data-tip="How much of motor power goes into useful drawbar work. Terrain losses reduce this.">
+        <div class="aline"></div><div class="olabel">Drawbar Efficiency</div>
+        <div class="ovalue">${r.eta_db.toFixed(1)}</div>
+        <div class="ounit">% &nbsp;|&nbsp; slip loss: ${r.slip_pct}%</div>
+        <div class="oformula">F_db·v / P_motor</div>
       </div>
-    </div>`;
+    </div>
+    <button class="export-btn" onclick="exportResults()">↗ Export results</button>`;
 
   // Force breakdown
   const forces = [
-    { name: 'Inertia (acceleration)', val: r.F_accel, cls: 'bar-accel' },
-    { name: 'Grade resistance',        val: r.F_grade, cls: 'bar-grade' },
-    { name: 'Rolling resistance',      val: r.F_roll,  cls: 'bar-roll'  },
-    { name: 'Aerodynamic drag',        val: r.F_aero,  cls: 'bar-aero'  },
+    { name:'Rolling resistance (ASABE S296)', val:r.F_roll,  cls:'b1' },
+    { name:'Grade / slope force',             val:r.F_grade, cls:'b2' },
+    { name:'Sinkage resistance',              val:r.F_sink,  cls:'b3' },
+    { name:'Drawbar + implement draught',     val:r.F_db,    cls:'b4' },
+    { name:'Slip resistance loss',            val:r.F_slip,  cls:'b5' },
   ];
   const maxF = Math.max(...forces.map(f => Math.abs(f.val)), 1);
-
-  let rows = forces.map(f => `
-    <div class="force-row">
-      <span class="force-name">${f.name}</span>
-      <span class="force-val">${f.val.toFixed(1)} N</span>
+  const rows = forces.map(f => `
+    <div class="frow2">
+      <span class="fname">${f.name}</span>
+      <span class="fval">${f.val.toFixed(1)} N (${r.F_total>0?(f.val/r.F_total*100).toFixed(0):0}%)</span>
     </div>
-    <div class="force-bar-track">
-      <div class="force-bar ${f.cls}" style="width:${Math.min(100, Math.abs(f.val)/maxF*100).toFixed(1)}%"></div>
-    </div>`).join('');
-
-  document.getElementById('force-section').innerHTML = `
-    <div class="force-breakdown result-appear">
-      <h3>Resistance forces at ${i.speed_ms < 0.1 ? '0' : (i.speed_ms*3.6).toFixed(0)} km/h, ${i.grade_deg}° grade</h3>
+    <div class="btrack"><div class="bfill ${f.cls}" style="width:${Math.min(100,Math.abs(f.val)/maxF*100).toFixed(1)}%"></div></div>
+  `).join('');
+  document.getElementById('out-forces').innerHTML = `
+    <div class="fbreak ra">
+      <h3>At ${rv('field-speed')} km/h · ${rv('slope')}° slope · ${rv('slip')}% slip</h3>
       ${rows}
-      <div class="total-force">
-        <span class="name">Total required</span>
-        <span class="val">${r.F_total.toFixed(1)} N &nbsp;|&nbsp; ${(r.F_total/1000).toFixed(3)} kN</span>
-      </div>
+      <div class="ftotal"><span class="fn">Total tractive force</span><span class="fv">${r.F_total.toFixed(1)} N &nbsp;|&nbsp; ${(r.F_total/1000).toFixed(3)} kN</span></div>
     </div>`;
+}
 
-  // Limits check
-  const checks = buildLimitsCheck(r);
-  let rows2 = checks.map(c => `
-    <tr>
-      <td>${c.name}</td>
-      <td>${c.value}</td>
-      <td>${c.limit}</td>
-      <td class="${c.cls}">${c.status}</td>
-    </tr>`).join('');
+// ─── TORQUE-SPEED CHART ──────────────────────────
+function renderTorqueChart(maxRPM, r_wheel, gr, eff, Cr, m, slope_deg, F_extra) {
+  document.getElementById('out-chart').innerHTML = `
+    <div class="chartwrap ra">
+      <h3>Motor torque & wheel speed vs RPM (0 → ${(maxRPM*1.2).toFixed(0)})</h3>
+      <canvas id="tq-canvas" width="600" height="140"></canvas>
+    </div>`;
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('tq-canvas');
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth * dpr || 600;
+    const H = 140 * dpr;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const steps = 80, maxR = maxRPM * 1.2;
+    const pts_t = [], pts_v = [];
+    let maxTau = 0, maxV = 0;
+    const theta = slope_deg * Math.PI / 180;
+    const F_roll_base = Cr * m * g * Math.cos(theta);
+    const F_grade_base = m * g * Math.sin(theta);
+    for (let s = 0; s <= steps; s++) {
+      const rpm = (s / steps) * maxR;
+      const omega_w = (2 * Math.PI * rpm) / (60 * gr);
+      const v_ms = omega_w * r_wheel;
+      const F_t = F_roll_base + F_grade_base + F_extra;
+      const tau_m = (F_t * r_wheel) / (gr * eff);
+      pts_t.push({ rpm, val: tau_m });
+      pts_v.push({ rpm, val: v_ms * 3.6 });
+      maxTau = Math.max(maxTau, tau_m);
+      maxV = Math.max(maxV, v_ms * 3.6);
+    }
+    const pad = { t: 14*dpr, r: 20*dpr, b: 28*dpr, l: 54*dpr };
+    const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+    ctx.clearRect(0, 0, W, H);
+    // grid
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = dpr;
+    for (let k = 0; k <= 4; k++) {
+      const y = pad.t + (k/4)*cH;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cW, y); ctx.stroke();
+    }
+    function drawCurve(pts, maxVal, color, alpha) {
+      ctx.beginPath();
+      pts.forEach((p,i) => {
+        const x = pad.l + (p.rpm/maxR)*cW;
+        const y = pad.t + cH - (p.val/Math.max(maxVal,0.01))*cH;
+        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle = color; ctx.lineWidth = 2*dpr; ctx.globalAlpha = alpha; ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    drawCurve(pts_t, maxTau, '#2d6a2d', 1);
+    drawCurve(pts_v, maxV,  '#1a5f7a', 0.8);
+    // current RPM marker
+    const cx = pad.l + (maxRPM / maxR) * cW;
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.setLineDash([4*dpr,4*dpr]); ctx.lineWidth = dpr;
+    ctx.beginPath(); ctx.moveTo(cx,pad.t); ctx.lineTo(cx,pad.t+cH); ctx.stroke(); ctx.setLineDash([]);
+    // axis labels
+    ctx.fillStyle = '#9ca3af'; ctx.font = `${9*dpr}px Azeret Mono`; ctx.textAlign = 'center';
+    for (let k=0; k<=4; k++) ctx.fillText(Math.round((k/4)*maxR), pad.l+(k/4)*cW, H-6*dpr);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#2d6a2d'; ctx.fillText(`${maxTau.toFixed(1)}N·m`, pad.l-4*dpr, pad.t+10*dpr);
+    ctx.fillStyle = '#1a5f7a'; ctx.fillText(`${maxV.toFixed(1)}km/h`, pad.l-4*dpr, pad.t+22*dpr);
+  });
+}
 
-  document.getElementById('limits-section').innerHTML = `
-    <table class="limits-table result-appear">
-      <thead><tr><th>Parameter</th><th>Calculated</th><th>Std. limit</th><th>Status</th></tr></thead>
-      <tbody>${rows2}</tbody>
+// ─── LIMITS CHECK ────────────────────────────────
+function renderLimits(d) {
+  const checks = [
+    { name:'Ground contact pressure (soil compaction)',
+      value: d.GCP.toFixed(1)+' kPa', limit:'< 100 kPa (tilled)',
+      cls:  d.GCP<80?'sok':d.GCP<150?'swarn':'sbad',
+      status: d.GCP<80?'✓ OK':d.GCP<150?'⚠ Monitor':'✗ High — compaction risk' },
+    { name:'Traction coefficient (ASABE S296.5)',
+      value: d.mu_traction.toFixed(3), limit:'< 0.5 (tilled soil)',
+      cls:  d.mu_traction<0.5?'sok':d.mu_traction<0.7?'swarn':'sbad',
+      status: d.mu_traction<0.5?'✓ Adequate':d.mu_traction<0.7?'⚠ Marginal':'✗ Excessive slip' },
+    { name:'Wheel slip (ISO 11684-1)',
+      value: d.slip_pct.toFixed(0)+'%', limit:'< 15% (field ops)',
+      cls:  d.slip_pct<15?'sok':d.slip_pct<25?'swarn':'sbad',
+      status: d.slip_pct<15?'✓ OK':d.slip_pct<25?'⚠ High slip':'✗ Excessive' },
+    { name:'Field slope — stability (ISO 11684)',
+      value: Math.abs(d.slope).toFixed(1)+'°', limit:'< 15° for AGV ops',
+      cls:  Math.abs(d.slope)<15?'sok':Math.abs(d.slope)<20?'swarn':'sbad',
+      status: Math.abs(d.slope)<15?'✓ Safe':Math.abs(d.slope)<20?'⚠ Caution':'✗ Tip-over risk' },
+    { name:'Drawbar efficiency',
+      value: d.eta_db.toFixed(1)+'%', limit:'> 50% (target 60–75%)',
+      cls:  d.eta_db>60?'sok':d.eta_db>40?'swarn':'sbad',
+      status: d.eta_db>60?'✓ Efficient':d.eta_db>40?'⚠ Marginal':'✗ Poor — review terrain' },
+    { name:'Motor power vs rated (margin)',
+      value: (d.P_motor/1000).toFixed(2)+' kW', limit:'Within motor rating',
+      cls:  'sok', status:'✓ Check vs motor nameplate' },
+    { name:'Total vehicle mass (trafficability)',
+      value: d.m_total.toFixed(0)+' kg', limit:'< 1500 kg (row crops)',
+      cls:  d.m_total<1500?'sok':d.m_total<3000?'swarn':'sbad',
+      status: d.m_total<1500?'✓ OK':d.m_total<3000?'⚠ Monitor rows':'✗ Heavy — crop damage risk' },
+    { name:'Field speed (operator safety — ISO 4254)',
+      value: (d.v_actual*3.6).toFixed(2)+' km/h', limit:'≤ 15 km/h (guided ops)',
+      cls:  d.v_actual*3.6<=15?'sok':d.v_actual*3.6<=25?'swarn':'sbad',
+      status: d.v_actual*3.6<=15?'✓ Safe':d.v_actual*3.6<=25?'⚠ High':'✗ Exceed guidance limit' },
+  ];
+  document.getElementById('out-limits').innerHTML = `
+    <table class="stable ra">
+      <thead><tr><th>Parameter</th><th>Value</th><th>Standard limit</th><th>Status</th></tr></thead>
+      <tbody>${checks.map(c=>`<tr><td>${c.name}</td><td>${c.value}</td><td>${c.limit}</td><td class="${c.cls}">${c.status}</td></tr>`).join('')}</tbody>
     </table>`;
 }
 
-function buildLimitsCheck(r) {
-  const i = r.i;
-  const v_kmh = r.v_rpm_kmh;
-  const v_ms = r.v_rpm_ms;
-  const checks = [];
+// ─── SOIL CALC (Tab 2) ───────────────────────────
+function calcSoil() {
+  const kc   = rv('s-kc');
+  const kphi = rv('s-kphi');
+  const n    = rv('s-n');
+  const c    = rv('s-c') * 1000;    // Pa
+  const phi  = rv('s-phi') * Math.PI / 180;
+  const b    = rv('cl');   // contact width
+  const L    = rv('cw');   // contact length
+  const moist= rv('s-moist');
+  const pen  = rv('s-pen') * 1000; // Pa
 
-  // Max speed check (typical road: 130 km/h highway)
-  checks.push({
-    name: 'Operating speed vs highway limit',
-    value: v_kmh.toFixed(1) + ' km/h',
-    limit: '≤ 130 km/h',
-    status: v_kmh <= 130 ? '✓ OK' : v_kmh <= 200 ? '⚠ High' : '✗ Exceeds',
-    cls: v_kmh <= 130 ? 'status-ok' : v_kmh <= 200 ? 'status-warn' : 'status-bad',
+  // Max bearing capacity (Terzaghi simplified)
+  const Nq  = Math.exp(Math.PI * Math.tan(phi)) * Math.pow(Math.tan(Math.PI/4 + phi/2), 2);
+  const Nc  = (Nq - 1) / Math.tan(phi);
+  const Ng  = 2 * (Nq + 1) * Math.tan(phi);
+  const q_ult = c * Nc + 0.5 * rv('s-rho') * g * b * Ng;  // Pa
+
+  // Sinkage under different loads
+  const loads = [100, 200, 400, 800, 1600, 3200];
+  const sinkages = loads.map(W => {
+    const q = W * g / (b * L);  // pressure Pa
+    const z = Math.pow(q / (kc/b + kphi), 1/n) * 100; // cm
+    return { W, q: q/1000, z: Math.max(0, z) };
   });
 
-  // Acceleration check (SAE J2807: max 12 m/s²)
-  checks.push({
-    name: 'Acceleration (SAE J2807)',
-    value: i.accel.toFixed(2) + ' m/s²',
-    limit: '≤ 12 m/s²',
-    status: i.accel <= 12 ? '✓ OK' : '✗ Exceeds',
-    cls: i.accel <= 12 ? 'status-ok' : 'status-bad',
-  });
+  // Max shear (Bekker-Janosi)
+  const tau_max = c + pen * Math.tan(phi);
+  const K_slip  = 0.02 + moist * 0.003; // empirical
 
-  // Grade check (ISO 8855 max grade for passenger vehicles: 20°)
-  checks.push({
-    name: 'Grade angle (ISO 8855)',
-    value: Math.abs(i.grade_deg).toFixed(1) + '°',
-    limit: '≤ 20° (passenger)',
-    status: Math.abs(i.grade_deg) <= 20 ? '✓ OK' : '✗ Exceeds',
-    cls: Math.abs(i.grade_deg) <= 20 ? 'status-ok' : 'status-bad',
-  });
+  document.getElementById('soil-results').querySelector('.pb').innerHTML = `
+    <div class="ogrid ra">
+      <div class="ocard cg" data-tip="Ultimate soil bearing capacity by Terzaghi formula.">
+        <div class="aline"></div><div class="olabel">Soil Bearing Capacity</div>
+        <div class="ovalue">${(q_ult/1000).toFixed(0)}</div>
+        <div class="ounit">kPa (Terzaghi, simplified)</div>
+      </div>
+      <div class="ocard ce" data-tip="Maximum shear stress the soil can sustain (Bekker-Janosi).">
+        <div class="aline"></div><div class="olabel">Max Soil Shear Stress</div>
+        <div class="ovalue">${(tau_max/1000).toFixed(1)}</div>
+        <div class="ounit">kPa &nbsp;|&nbsp; K_slip = ${K_slip.toFixed(3)} m</div>
+      </div>
+      <div class="ocard cs" data-tip="Moisture-adjusted trafficability index.">
+        <div class="aline"></div><div class="olabel">Trafficability Index</div>
+        <div class="ovalue">${moist < 30 ? 'Good' : moist < 45 ? 'Fair' : 'Poor'}</div>
+        <div class="ounit">Moisture: ${moist}% · Pen: ${(pen/1000).toFixed(0)} kPa</div>
+      </div>
+      <div class="ocard ${q_ult/1000 > 150 ? 'cg' : q_ult/1000 > 80 ? 'cw' : 'cr'}" data-tip="Whether soil can support vehicle without excessive compaction.">
+        <div class="aline"></div><div class="olabel">Compaction Risk</div>
+        <div class="ovalue">${q_ult/1000 > 150 ? 'Low' : q_ult/1000 > 80 ? 'Medium' : 'High'}</div>
+        <div class="ounit">Bearing capacity: ${(q_ult/1000).toFixed(0)} kPa</div>
+      </div>
+    </div>
+    <div class="fbreak ra" style="margin-top:10px;">
+      <h3>Sinkage estimates (Bekker) for contact area ${b.toFixed(2)}×${L.toFixed(2)} m</h3>
+      ${sinkages.map(s=>`
+        <div class="frow2"><span class="fname">${s.W} kg load</span><span class="fval">${s.q.toFixed(1)} kPa → z = ${s.z.toFixed(1)} cm</span></div>
+        <div class="btrack"><div class="bfill b2" style="width:${Math.min(100,s.z/5*100).toFixed(1)}%"></div></div>
+      `).join('')}
+    </div>`;
 
-  // Traction limit
-  checks.push({
-    name: 'Traction vs limit',
-    value: r.F_total.toFixed(0) + ' N',
-    limit: r.F_traction_max.toFixed(0) + ' N max',
-    status: r.traction_ok ? '✓ OK' : '⚠ Wheelspin risk',
-    cls: r.traction_ok ? 'status-ok' : 'status-warn',
-  });
+  // Sinkage chart
+  renderSinkageChart(sinkages);
+}
 
-  // Rolling resistance (UNECE R117: μ ≤ 0.015 for class C1)
-  checks.push({
-    name: 'Rolling resistance (UNECE R117)',
-    value: i.mu_roll.toFixed(4),
-    limit: '≤ 0.015 (C1 tyre)',
-    status: i.mu_roll <= 0.015 ? '✓ OK' : i.mu_roll <= 0.025 ? '⚠ High' : '✗ Exceeds',
-    cls: i.mu_roll <= 0.015 ? 'status-ok' : i.mu_roll <= 0.025 ? 'status-warn' : 'status-bad',
+function renderSinkageChart(data) {
+  const panel = document.getElementById('soil-chart-panel');
+  panel.querySelector('.pb').innerHTML = `
+    <div class="chartwrap ra">
+      <h3>Sinkage vs Vehicle load (Bekker model)</h3>
+      <canvas id="sink-canvas" width="600" height="140"></canvas>
+    </div>`;
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('sink-canvas');
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth * dpr || 600;
+    const H = 140 * dpr;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const pad = { t: 14*dpr, r: 20*dpr, b: 28*dpr, l: 54*dpr };
+    const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+    ctx.clearRect(0,0,W,H);
+    const maxZ = Math.max(...data.map(d=>d.z), 1);
+    const maxW = Math.max(...data.map(d=>d.W));
+    // grid
+    ctx.strokeStyle='rgba(0,0,0,0.06)'; ctx.lineWidth=dpr;
+    for (let k=0;k<=4;k++) {
+      const y=pad.t+(k/4)*cH; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cW,y); ctx.stroke();
+    }
+    // curve
+    ctx.beginPath();
+    data.forEach((d,i) => {
+      const x = pad.l + (d.W/maxW)*cW;
+      const y = pad.t + cH - (d.z/maxZ)*cH;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle='#7a5c2e'; ctx.lineWidth=2*dpr; ctx.stroke();
+    // dots
+    data.forEach(d => {
+      const x = pad.l + (d.W/maxW)*cW;
+      const y = pad.t + cH - (d.z/maxZ)*cH;
+      ctx.beginPath(); ctx.arc(x,y,3*dpr,0,Math.PI*2);
+      ctx.fillStyle='#7a5c2e'; ctx.fill();
+    });
+    ctx.fillStyle='#9ca3af'; ctx.font=`${9*dpr}px Azeret Mono`; ctx.textAlign='center';
+    data.forEach(d => ctx.fillText(d.W+'kg', pad.l+(d.W/maxW)*cW, H-6*dpr));
+    ctx.textAlign='right';
+    ctx.fillStyle='#7a5c2e'; ctx.fillText(`${maxZ.toFixed(1)} cm`, pad.l-4*dpr, pad.t+10*dpr);
   });
+}
 
-  // Drag coefficient vs class
-  const cd_limit = r.m < 1000 ? 0.45 : r.m < 3000 ? 0.40 : 0.60;
-  checks.push({
-    name: 'Drag coefficient (class avg.)',
-    value: i.cd.toFixed(3),
-    limit: `≤ ${cd_limit.toFixed(2)} (typical)`,
-    status: i.cd <= cd_limit ? '✓ OK' : '⚠ High drag',
-    cls: i.cd <= cd_limit ? 'status-ok' : 'status-warn',
-  });
+// ─── POWER CALC (Tab 3) ──────────────────────────
+function calcPower() {
+  const bv    = rv('batt-v');
+  const bah   = rv('batt-ah');
+  const soc   = rv('batt-soc') / 100;
+  const crate = rv('c-rate');
+  const beff  = rv('batt-eff') / 100;
+  const meff  = rv('motor-eff') / 100;
+  const ceff  = rv('ctrl-eff') / 100;
+  const mpower= rv('motor-pw');
+  const p_sens= rv('p-sensors');
+  const p_impl= rv('p-impl');
+  const p_comms=rv('p-comms');
+  const spd   = rv('p-speed') / 3.6;
 
-  // Power-to-weight
-  checks.push({
-    name: 'Power-to-weight ratio',
-    value: r.pw_ratio.toFixed(1) + ' kW/t',
-    limit: '5–400 kW/t typical',
-    status: r.pw_ratio >= 5 && r.pw_ratio <= 400 ? '✓ OK' : '⚠ Out of range',
-    cls: r.pw_ratio >= 5 && r.pw_ratio <= 400 ? 'status-ok' : 'status-warn',
-  });
+  const E_total_kWh = (bv * bah) / 1000;
+  const E_usable = E_total_kWh * soc * beff;
+  const P_max_batt = bv * bah * crate / 1000; // kW
+  const P_ancillary = (p_sens + p_impl + p_comms) / 1000; // kW
+  const P_propulsion = mpower / 1000; // kW
+  const P_total = P_propulsion + P_ancillary;
+  const eta_sys = meff * ceff * beff;
+  const P_from_batt = P_total / eta_sys;
+  const runtime_h = E_usable / P_from_batt;
+  const range_km = runtime_h * spd * 3.6;
+  const area_ha_h = (spd * 3.6) * 1.5 / 10; // approx: speed × width / 10000*10000
+  const area_total = area_ha_h * runtime_h;
 
-  // Drivetrain efficiency
-  checks.push({
-    name: 'Drivetrain efficiency',
-    value: (i.eff * 100).toFixed(0) + '%',
-    limit: '75%–97% (SAE J1349)',
-    status: i.eff >= 0.75 && i.eff <= 0.97 ? '✓ OK' : '⚠ Check',
-    cls: i.eff >= 0.75 && i.eff <= 0.97 ? 'status-ok' : 'status-warn',
-  });
+  const pwrSrc = document.getElementById('power-src').value;
+  const co2 = pwrSrc === 'fuel' ? 0 : pwrSrc === 'hybrid' ? (P_total * 0.3 * 0.5).toFixed(2) : '0 (electric)';
 
-  return checks;
+  document.getElementById('power-results').querySelector('.pb').innerHTML = `
+    <div class="ogrid ra">
+      <div class="ocard cg"><div class="aline"></div><div class="olabel">Usable energy</div>
+        <div class="ovalue">${E_usable.toFixed(1)}</div><div class="ounit">kWh &nbsp;|&nbsp; total: ${E_total_kWh.toFixed(1)} kWh</div></div>
+      <div class="ocard cs"><div class="aline"></div><div class="olabel">Max battery power</div>
+        <div class="ovalue">${P_max_batt.toFixed(1)}</div><div class="ounit">kW @ ${crate}C discharge</div></div>
+      <div class="ocard ce"><div class="aline"></div><div class="olabel">System efficiency</div>
+        <div class="ovalue">${(eta_sys*100).toFixed(1)}</div><div class="ounit">% (batt × motor × controller)</div></div>
+      <div class="ocard cg"><div class="aline"></div><div class="olabel">Total power draw</div>
+        <div class="ovalue">${P_from_batt.toFixed(2)}</div><div class="ounit">kW from battery &nbsp;|&nbsp; ancillary: ${P_ancillary.toFixed(2)} kW</div></div>
+      <div class="ocard cs"><div class="aline"></div><div class="olabel">Field runtime</div>
+        <div class="ovalue">${runtime_h.toFixed(1)}</div><div class="ounit">hours per charge</div></div>
+      <div class="ocard cg"><div class="aline"></div><div class="olabel">Range per charge</div>
+        <div class="ovalue">${range_km.toFixed(1)}</div><div class="ounit">km &nbsp;|&nbsp; at ${rv('p-speed')} km/h</div></div>
+      <div class="ocard ce"><div class="aline"></div><div class="olabel">Est. area per charge</div>
+        <div class="ovalue">${area_total.toFixed(2)}</div><div class="ounit">ha (approx 1.5 m width)</div></div>
+      <div class="ocard cs"><div class="aline"></div><div class="olabel">CO₂ equivalent</div>
+        <div class="ovalue">${co2}</div><div class="ounit">kg CO₂/h (approx)</div></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;line-height:1.8;">
+      ⚠ Runtime estimates assume steady-state draw. Actual field runtime varies with terrain, slope, implement load, temperature, and battery age.
+    </div>`;
+}
+
+// ─── FIELD CALC (Tab 4) ──────────────────────────
+function calcField() {
+  const fLen  = rv('f-len');
+  const fWid  = rv('f-wid');
+  const implW = rv('impl-w');
+  const ovlap = rv('overlap') / 100;
+  const turnR = rv('turn-r');
+  const headl = rv('headland');
+  const spd   = rv('ff-speed');   // km/h
+  const spd_ms= spd / 3.6;
+  const workH = rv('work-h');
+
+  const eff_width = implW * (1 - ovlap);
+  const working_area = (fLen - 2*headl) * (fWid - 2*headl); // m²
+  const n_passes = Math.ceil((fWid - 2*headl) / eff_width);
+  const total_path_m = n_passes * (fLen - 2*headl) + n_passes * (headl * 2);
+  const time_working_s = (fLen - 2*headl) * n_passes / spd_ms;
+  const time_turning_s = n_passes * (Math.PI * turnR / spd_ms + 2);  // approx U-turn time
+  const time_total_s   = time_working_s + time_turning_s;
+  const time_total_h   = time_total_s / 3600;
+  const coverage_eff   = time_working_s / Math.max(time_total_s, 1) * 100;
+  const area_ha        = working_area / 10000;
+  const throughput_ha_h= area_ha / Math.max(time_total_h, 0.01);
+  const days_needed    = time_total_h / workH;
+
+  const opType = document.getElementById('op-type').value;
+  const swath_speed = { spray:6, seed:5, harvest:3, mow:7, till:3, survey:10 };
+  const rec_speed = swath_speed[opType] || 4;
+
+  document.getElementById('field-results').querySelector('.pb').innerHTML = `
+    <div class="ogrid ra">
+      <div class="ocard cg"><div class="aline"></div><div class="olabel">Working area</div>
+        <div class="ovalue">${area_ha.toFixed(2)}</div><div class="ounit">ha &nbsp;|&nbsp; ${working_area.toFixed(0)} m²</div></div>
+      <div class="ocard cs"><div class="aline"></div><div class="olabel">Number of passes</div>
+        <div class="ovalue">${n_passes}</div><div class="ounit">effective width: ${eff_width.toFixed(2)} m/pass</div></div>
+      <div class="ocard ce"><div class="aline"></div><div class="olabel">Total path length</div>
+        <div class="ovalue">${(total_path_m/1000).toFixed(2)}</div><div class="ounit">km &nbsp;|&nbsp; ${total_path_m.toFixed(0)} m</div></div>
+      <div class="ocard cg"><div class="aline"></div><div class="olabel">Field time required</div>
+        <div class="ovalue">${time_total_h.toFixed(2)}</div><div class="ounit">hours &nbsp;|&nbsp; turning: ${(time_turning_s/60).toFixed(1)} min</div></div>
+      <div class="ocard cs"><div class="aline"></div><div class="olabel">Field efficiency</div>
+        <div class="ovalue">${coverage_eff.toFixed(1)}</div><div class="ounit">% (working time / total time)</div></div>
+      <div class="ocard cg"><div class="aline"></div><div class="olabel">Throughput</div>
+        <div class="ovalue">${throughput_ha_h.toFixed(3)}</div><div class="ounit">ha/h &nbsp;|&nbsp; days: ${days_needed.toFixed(1)}</div></div>
+      <div class="ocard ce"><div class="aline"></div><div class="olabel">Recommended speed</div>
+        <div class="ovalue">${rec_speed}</div><div class="ounit">km/h for ${opType} operation</div></div>
+      <div class="ocard ${spd <= rec_speed+1 ? 'cg':'cw'}"><div class="aline"></div><div class="olabel">Speed vs rec.</div>
+        <div class="ovalue">${spd <= rec_speed+1 ? '✓ OK':'⚠ High'}</div>
+        <div class="ounit">set: ${spd} km/h · rec: ${rec_speed} km/h</div></div>
+    </div>`;
+}
+
+// ─── EXPORT ──────────────────────────────────────
+function exportResults() {
+  const m = rv('agv-mass')+rv('impl-mass')+rv('crop-mass');
+  const txt = `AGRI-AGV DYNAMICS CALCULATOR — RESULTS
+${'─'.repeat(44)}
+Vehicle:  ${document.getElementById('agv-class').value} | ${document.getElementById('drive-type').value}
+Mass:     ${m} kg total (AGV + implement + crop)
+Terrain:  ${document.getElementById('terrain').value} | Slope: ${rv('slope')}°
+Slip:     ${rv('slip')}%
+${'─'.repeat(44)}
+Motor torque required : calculated in app
+Field speed           : ${rv('field-speed')} km/h target
+Drawbar pull          : ${rv('drawbar')} N
+Draught force         : ${rv('draught')} N
+Rolling resistance Cr : ${rv('cr')}
+Soil thrust coeff Ks  : ${rv('ks')}
+${'─'.repeat(44)}
+Generated: ${new Date().toLocaleString()}`;
+  navigator.clipboard.writeText(txt).then(() => showToast('✓ Copied to clipboard'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 // ─── RESET ───────────────────────────────────────
 function resetAll() {
-  document.getElementById('mass').value         = 1500;
-  document.getElementById('payload').value      = 200;
-  document.getElementById('wheel-radius').value = 0.32;
-  document.getElementById('frontal-area').value = 2.2;
-  document.getElementById('rpm').value          = 4000;
-  document.getElementById('gear-ratio').value   = 3.5;
-  document.getElementById('efficiency').value   = 88;
-  document.getElementById('driven-wheels').value= 2;
-  document.getElementById('rho').value          = 1.225;
-  document.getElementById('cd').value           = 0.30;
-  document.getElementById('mu-roll').value      = 0.015;
-  document.getElementById('mu-tyre').value      = 0.85;
-  document.getElementById('acceleration').value = 2.0;
-  document.getElementById('grade-deg').value    = 0;
-  document.getElementById('target-speed').value = 120;
-  document.getElementById('weight-bias').value  = 50;
-  document.getElementById('vehicle-type').value = 'custom';
-
-  document.getElementById('primary-outputs').innerHTML = `<div class="placeholder"><div class="icon">⚡</div><p>Enter your vehicle parameters<br>and press <strong>Calculate</strong></p></div>`;
-  document.getElementById('force-section').innerHTML   = `<div class="placeholder"><div class="icon">📊</div><p>Force breakdown will appear here</p></div>`;
-  document.getElementById('limits-section').innerHTML  = `<div class="placeholder"><div class="icon">✓</div><p>Validation results will appear here</p></div>`;
-  document.getElementById('output-badge').textContent  = 'Awaiting input';
+  document.getElementById('agv-class').value  = 'medium';
+  document.getElementById('drive-type').value = '4wd';
+  document.getElementById('terrain').value    = 'tilled';
+  applyPreset(); applyTerrain(); calcTraction();
+  showToast('↺ Reset to defaults');
 }
 
-// Allow Enter key to calculate
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') calculate();
+// ─── INIT ─────────────────────────────────────────
+window.addEventListener('load', () => {
+  applyTerrain();
+  calcTraction();
+  calcSoil();
+  calcPower();
+  calcField();
+});
+window.addEventListener('resize', () => {
+  calcTraction();
 });
 </script>
 </body>
