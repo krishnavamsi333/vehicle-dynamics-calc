@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Dynamics Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface2: #f0f1f4;
+    --border: #dde0e8;
+    --border-strong: #c8ccd8;
+    --accent: #1a56db;
+    --accent-light: #eff4ff;
+    --accent2: #0e9f6e;
+    --accent2-light: #f0fdf4;
+    --danger: #c81e1e;
+    --danger-light: #fdf2f2;
+    --amber: #b45309;
+    --amber-light: #fffbeb;
+    --text: #111827;
+    --muted: #6b7280;
+    --label: #374151;
+    --green: #057a55;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --cond: 'DM Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ─── HEADER ─────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .logo-mark {
+    width: 34px; height: 34px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px; font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-family: var(--sans);
+    font-size: 18px; font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  header span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-left: auto;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  /* ─── LAYOUT ─────────────────────────────────── */
+  .wrapper {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  /* ─── SECTIONS ───────────────────────────────── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .section-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-icon {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .icon-blue  { background: #dbeafe; color: #1d4ed8; }
+  .icon-amber { background: #fef3c7; color: #92400e; }
+  .icon-green { background: #d1fae5; color: #065f46; }
+  .icon-red   { background: #fee2e2; color: #991b1b; }
+
+  .section-header h2 {
+    font-family: var(--sans);
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--label);
+  }
+  .section-header .badge {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--border);
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .section-body { padding: 18px; }
+
+  /* ─── FIELD GROUPS ───────────────────────────── */
+  .field-group {
+    margin-bottom: 14px;
+  }
+  .field-group:last-child { margin-bottom: 0; }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .field-row:last-child { margin-bottom: 0; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  label .formula {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  input[type="number"], select {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input[type="number"]:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+  }
+  input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+
+  select option { background: var(--surface); color: var(--text); }
+
+  /* ─── UNIT TOGGLE ────────────────────────────── */
+  .unit-toggle {
+    display: flex;
+    gap: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .unit-toggle button {
+    flex: 1;
+    padding: 8px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .unit-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ─── DIVIDER ─────────────────────────────────── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+  .sub-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* ─── CALCULATE BUTTON ───────────────────────── */
+  .calc-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    margin-top: 6px;
+    box-shadow: 0 2px 6px rgba(26,86,219,0.3);
+  }
+  .calc-btn:hover { background: #1740a8; box-shadow: 0 4px 10px rgba(26,86,219,0.35); }
+  .calc-btn:active { transform: scale(0.98); }
+
+  .reset-btn {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* ─── OUTPUTS ─────────────────────────────────── */
+  .outputs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .output-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .output-card.highlight { border-color: var(--accent); background: var(--accent-light); }
+  .output-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .output-card.highlight::before { opacity: 1; }
+
+  .output-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .output-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+    transition: all 0.3s;
+  }
+  .output-unit {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .output-formula {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    margin-top: 6px;
+    opacity: 0.65;
+  }
+
+  .output-card.warn .output-value { color: var(--danger); }
+  .output-card.warn::before { background: var(--danger); opacity: 1; }
+  .output-card.warn { border-color: var(--danger); background: var(--danger-light); }
+
+  /* ─── FORCE BREAKDOWN ────────────────────────── */
+  .force-breakdown {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .force-breakdown h3 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .force-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .force-name { color: var(--label); }
+  .force-val  { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .force-bar-track {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+  }
+  .force-bar {
+    height: 4px;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .bar-accel  { background: #1a56db; }
+  .bar-grade  { background: #b45309; }
+  .bar-roll   { background: #057a55; }
+  .bar-aero   { background: #c81e1e; }
+
+  .total-force {
+    display: flex; justify-content: space-between;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    font-weight: 600;
+  }
+  .total-force .name { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--label); }
+  .total-force .val  { font-family: var(--mono); font-size: 14px; color: var(--accent); }
+
+  /* ─── STANDARD LIMITS TABLE ──────────────────── */
+  .limits-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .limits-table th {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 2px solid var(--border);
+    background: var(--surface2);
+  }
+  .limits-table td {
+    padding: 9px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .limits-table tr:last-child td { border-bottom: none; }
+  .limits-table tr:hover td { background: var(--surface2); }
+  .limits-table td:first-child { color: var(--text); font-size: 12px; font-family: var(--sans); font-weight: 500; }
+  .status-ok   { color: #065f46 !important; font-weight: 600 !important; }
+  .status-warn { color: #92400e !important; font-weight: 600 !important; }
+  .status-bad  { color: #991b1b !important; font-weight: 600 !important; }
+
+  /* ─── FULL WIDTH SECTION ─────────────────────── */
+  .full-width { grid-column: 1 / -1; }
+
+  /* ─── PLACEHOLDER ────────────────────────────── */
+  .placeholder {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--muted);
+  }
+  .placeholder .icon { font-size: 28px; margin-bottom: 10px; opacity: 0.3; }
+  .placeholder p { font-size: 13px; line-height: 1.6; color: var(--muted); }
+
+  /* ─── FOOTER NOTES ───────────────────────────── */
+  .notes {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .notes h3 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .note-item { font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .note-item strong { display: block; font-family: var(--mono); font-size: 11px; color: var(--accent); margin-bottom: 4px; font-weight: 500; }
+
+  /* ─── ANIMATIONS ─────────────────────────────── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .result-appear { animation: fadeIn 0.3s ease both; }
+
+  /* ─── RESPONSIVE ─────────────────────────────── */
+  @media (max-width: 900px) {
+    .wrapper { grid-template-columns: 1fr; padding: 20px; }
+    .full-width { grid-column: 1; }
+    .notes-grid { grid-template-columns: 1fr; }
+    header { padding: 16px 20px; }
+    header span { display: none; }
+  }
+  @media (max-width: 500px) {
+    .outputs-grid { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">V</div>
+  <h1>Vehicle Dynamics Calculator</h1>
+  <span>SAE / ISO Standards</span>
+</header>
+
+<div class="wrapper">
+
+  <!-- ─── LEFT: INPUTS ─────────────────────────── -->
+  <div>
+    <!-- Unit system -->
+    <div class="section" style="margin-bottom:20px;">
+      <div class="section-header">
+        <div class="section-icon icon-amber">⚙</div>
+        <h2>Unit System</h2>
+      </div>
+      <div class="section-body" style="padding-bottom:16px;">
+        <div class="unit-toggle">
+          <button class="active" onclick="setUnits('si')">SI (metric)</button>
+          <button onclick="setUnits('imperial')">Imperial</button>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Vehicle type</label>
+            <select id="vehicle-type" onchange="applyPreset()">
+              <option value="custom">Custom</option>
+              <option value="car">Passenger car</option>
+              <option value="suv">SUV / Crossover</option>
+              <option value="truck">Light truck</option>
+              <option value="motorcycle">Motorcycle</option>
+              <option value="bus">Bus / Heavy</option>
+              <option value="evcar">Electric car</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Drive type</label>
+            <select id="drive-type">
+              <option value="rwd">RWD</option>
+              <option value="fwd">FWD</option>
+              <option value="awd">AWD</option>
+              <option value="4wd">4WD</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle Specs -->
+    <div class="section" style="margin-bottom:20px;">
+      <div class="section-header">
+        <div class="section-icon icon-blue">◈</div>
+        <h2>Vehicle Specifications</h2>
+        <span class="badge">Input</span>
+      </div>
+      <div class="section-body">
+        <p class="sub-label">Mass &amp; Geometry</p>
+        <div class="field-row">
+          <div class="field">
+            <label>Curb mass <span class="formula" id="lbl-mass-unit">(kg)</span></label>
+            <input type="number" id="mass" value="1500" min="1" step="10">
+          </div>
+          <div class="field">
+            <label>Payload / Load <span class="formula" id="lbl-load-unit">(kg)</span></label>
+            <input type="number" id="payload" value="200" min="0" step="10">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Wheel radius <span class="formula" id="lbl-radius-unit">(m)</span></label>
+            <input type="number" id="wheel-radius" value="0.32" min="0.01" step="0.01">
+          </div>
+          <div class="field">
+            <label>Frontal area <span class="formula" id="lbl-area-unit">(m²)</span></label>
+            <input type="number" id="frontal-area" value="2.2" min="0.1" step="0.1">
+          </div>
+        </div>
+
+        <hr class="divider">
+        <p class="sub-label">Engine &amp; Drivetrain</p>
+        <div class="field-row">
+          <div class="field">
+            <label>Engine RPM <span class="formula">(rpm)</span></label>
+            <input type="number" id="rpm" value="4000" min="100" step="100">
+          </div>
+          <div class="field">
+            <label>Overall gear ratio</label>
+            <input type="number" id="gear-ratio" value="3.5" min="0.1" step="0.1">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Drivetrain efficiency <span class="formula">(%)</span></label>
+            <input type="number" id="efficiency" value="88" min="50" max="100" step="1">
+          </div>
+          <div class="field">
+            <label>Number of driven wheels</label>
+            <input type="number" id="driven-wheels" value="2" min="1" max="4" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Road Conditions -->
+    <div class="section" style="margin-bottom:20px;">
+      <div class="section-header">
+        <div class="section-icon icon-blue">⛰</div>
+        <h2>Road Conditions</h2>
+        <span class="badge">Input</span>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Grade / Slope <span class="formula">(°)</span></label>
+            <input type="number" id="grade-deg" value="0" min="-30" max="30" step="0.5">
+          </div>
+          <div class="field">
+            <label>Rolling resistance μ</label>
+            <input type="number" id="mu-roll" value="0.015" min="0.005" max="0.05" step="0.001">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Drag coefficient Cd</label>
+            <input type="number" id="cd" value="0.30" min="0.10" max="1.5" step="0.01">
+          </div>
+          <div class="field">
+            <label>Air density ρ <span class="formula">(kg/m³)</span></label>
+            <input type="number" id="rho" value="1.225" min="0.9" max="1.4" step="0.001">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Goals -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-amber">▶</div>
+        <h2>Performance Goals</h2>
+        <span class="badge">Input</span>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Target speed <span class="formula" id="lbl-speed-unit">(km/h)</span></label>
+            <input type="number" id="target-speed" value="120" min="0" step="5">
+          </div>
+          <div class="field">
+            <label>Acceleration <span class="formula">(m/s²)</span></label>
+            <input type="number" id="acceleration" value="2.0" min="0" max="20" step="0.1">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Tyre–road friction μ</label>
+            <input type="number" id="mu-tyre" value="0.85" min="0.1" max="1.4" step="0.01">
+          </div>
+          <div class="field">
+            <label>Weight bias on drive axle <span class="formula">(%)</span></label>
+            <input type="number" id="weight-bias" value="50" min="0" max="100" step="1">
+          </div>
+        </div>
+
+        <button class="calc-btn" onclick="calculate()">▶ Calculate</button>
+        <button class="reset-btn" onclick="resetAll()">Reset to defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RIGHT: OUTPUTS ────────────────────────── -->
+  <div>
+    <div class="section" style="margin-bottom:20px;">
+      <div class="section-header">
+        <div class="section-icon icon-green">◎</div>
+        <h2>Primary Outputs</h2>
+        <span class="badge" id="output-badge">Awaiting input</span>
+      </div>
+      <div class="section-body" id="primary-outputs">
+        <div class="placeholder">
+          <div class="icon">⚡</div>
+          <p>Enter your vehicle parameters<br>and press <strong>Calculate</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:20px;">
+      <div class="section-header">
+        <div class="section-icon icon-amber">≡</div>
+        <h2>Force Breakdown</h2>
+        <span class="badge">Resistance analysis</span>
+      </div>
+      <div class="section-body" id="force-section">
+        <div class="placeholder">
+          <div class="icon">📊</div>
+          <p>Force breakdown will appear here</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-red">⚠</div>
+        <h2>Standards &amp; Limits Check</h2>
+        <span class="badge">SAE / ISO</span>
+      </div>
+      <div class="section-body" id="limits-section">
+        <div class="placeholder">
+          <div class="icon">✓</div>
+          <p>Validation results will appear here</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── FULL WIDTH: REFERENCE FORMULAS ───────── -->
+  <div class="notes">
+    <h3>Reference Formulas (SAE J1526 / ISO 8855)</h3>
+    <div class="notes-grid">
+      <div class="note-item">
+        <strong>Tractive force</strong>
+        F_total = m·a + m·g·sin(θ) + μ_r·m·g·cos(θ) + ½·ρ·Cd·A·v²
+      </div>
+      <div class="note-item">
+        <strong>Wheel torque → Engine torque</strong>
+        τ_engine = (F_total × r_wheel) / (GR × η)
+      </div>
+      <div class="note-item">
+        <strong>Engine angular velocity</strong>
+        ω = 2π·RPM / 60 (rad/s)
+      </div>
+      <div class="note-item">
+        <strong>Engine power</strong>
+        P = τ_engine × ω &nbsp;&nbsp; [W] → [kW] ÷ 1000
+      </div>
+      <div class="note-item">
+        <strong>Vehicle speed from RPM</strong>
+        v = (2π·r·RPM) / (60·GR) &nbsp;[m/s]
+      </div>
+      <div class="note-item">
+        <strong>Traction limit (per axle)</strong>
+        F_traction_max = μ_tyre × m·g × weight_bias
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────
+let units = 'si';
+
+const PRESETS = {
+  car:        { mass:1400, payload:160, radius:0.315, area:2.1, rpm:4500, gear:3.5, cd:0.28, mu_roll:0.012, eff:88 },
+  suv:        { mass:2000, payload:300, radius:0.360, area:2.8, rpm:3500, gear:3.2, cd:0.35, mu_roll:0.015, eff:85 },
+  truck:      { mass:2500, payload:800, radius:0.400, area:3.2, rpm:3000, gear:4.5, cd:0.45, mu_roll:0.018, eff:82 },
+  motorcycle: { mass:220,  payload:100, radius:0.300, area:0.8, rpm:7000, gear:4.0, cd:0.55, mu_roll:0.010, eff:90 },
+  bus:        { mass:8000, payload:5000,radius:0.520, area:7.0, rpm:2500, gear:5.0, cd:0.60, mu_roll:0.020, eff:80 },
+  evcar:      { mass:1800, payload:200, radius:0.330, area:2.3, rpm:8000, gear:9.5, cd:0.23, mu_roll:0.011, eff:95 },
+};
+
+// ─── UNITS ───────────────────────────────────────
+function setUnits(u) {
+  units = u;
+  document.querySelectorAll('.unit-toggle button').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && u==='si') || (i===1 && u==='imperial'));
+  });
+  if (u === 'si') {
+    document.getElementById('lbl-mass-unit').textContent   = '(kg)';
+    document.getElementById('lbl-load-unit').textContent   = '(kg)';
+    document.getElementById('lbl-radius-unit').textContent = '(m)';
+    document.getElementById('lbl-area-unit').textContent   = '(m²)';
+    document.getElementById('lbl-speed-unit').textContent  = '(km/h)';
+  } else {
+    document.getElementById('lbl-mass-unit').textContent   = '(lb)';
+    document.getElementById('lbl-load-unit').textContent   = '(lb)';
+    document.getElementById('lbl-radius-unit').textContent = '(in)';
+    document.getElementById('lbl-area-unit').textContent   = '(ft²)';
+    document.getElementById('lbl-speed-unit').textContent  = '(mph)';
+  }
+}
+
+function applyPreset() {
+  const v = document.getElementById('vehicle-type').value;
+  if (v === 'custom') return;
+  const p = PRESETS[v];
+  if (!p) return;
+  const conv = units === 'imperial';
+  document.getElementById('mass').value         = conv ? +(p.mass*2.20462).toFixed(0) : p.mass;
+  document.getElementById('payload').value      = conv ? +(p.payload*2.20462).toFixed(0) : p.payload;
+  document.getElementById('wheel-radius').value = conv ? +(p.radius*39.3701).toFixed(1) : p.radius;
+  document.getElementById('frontal-area').value = conv ? +(p.area*10.7639).toFixed(2) : p.area;
+  document.getElementById('rpm').value          = p.rpm;
+  document.getElementById('gear-ratio').value   = p.gear;
+  document.getElementById('cd').value           = p.cd;
+  document.getElementById('mu-roll').value      = p.mu_roll;
+  document.getElementById('efficiency').value   = p.eff;
+}
+
+// ─── GET INPUTS (always returns SI internally) ────
+function getInputs() {
+  const raw = (id) => parseFloat(document.getElementById(id).value) || 0;
+  let mass   = raw('mass');
+  let load   = raw('payload');
+  let radius = raw('wheel-radius');
+  let area   = raw('frontal-area');
+  let speed  = raw('target-speed');
+
+  if (units === 'imperial') {
+    mass   = mass   / 2.20462;      // lb → kg
+    load   = load   / 2.20462;
+    radius = radius / 39.3701;      // in → m
+    area   = area   / 10.7639;      // ft² → m²
+    speed  = speed  * 0.44704;      // mph → m/s
+  } else {
+    speed  = speed  / 3.6;          // km/h → m/s
+  }
+
+  return {
+    mass_total: mass + load,
+    mass, load,
+    radius,
+    area,
+    speed_ms: speed,
+    rpm:       raw('rpm'),
+    gr:        raw('gear-ratio'),
+    eff:       raw('efficiency') / 100,
+    rho:       raw('rho'),
+    cd:        raw('cd'),
+    mu_roll:   raw('mu-roll'),
+    mu_tyre:   raw('mu-tyre'),
+    accel:     raw('acceleration'),
+    grade_deg: raw('grade-deg'),
+    weight_bias: raw('weight-bias') / 100,
+    driven:    parseInt(raw('driven-wheels')),
+  };
+}
+
+// ─── CORE CALCULATIONS ────────────────────────────
+function calculate() {
+  const i = getInputs();
+  const g = 9.81;
+
+  // Total mass
+  const m = i.mass_total;
+  const W = m * g;  // total weight (N)
+
+  // Grade
+  const theta = i.grade_deg * Math.PI / 180;
+  const sin_theta = Math.sin(theta);
+  const cos_theta = Math.cos(theta);
+
+  // Resistance forces
+  const F_accel = m * i.accel;
+  const F_grade = m * g * sin_theta;
+  const F_roll  = i.mu_roll * m * g * cos_theta;
+  const F_aero  = 0.5 * i.rho * i.cd * i.area * i.speed_ms * i.speed_ms;
+  const F_total = F_accel + F_grade + F_roll + F_aero;
+
+  // Wheel torque
+  const tau_wheel = F_total * i.radius;
+
+  // Engine angular velocity
+  const omega = (2 * Math.PI * i.rpm) / 60;
+
+  // Engine torque required
+  const tau_engine = tau_wheel / (i.gr * i.eff);
+
+  // Engine power required
+  const P_required = tau_engine * omega;     // W
+  const P_kW = P_required / 1000;
+  const P_hp = P_kW * 1.34102;
+
+  // Vehicle speed from RPM
+  const v_rpm_ms = (2 * Math.PI * i.radius * i.rpm) / (60 * i.gr);
+  const v_rpm_kmh = v_rpm_ms * 3.6;
+  const v_rpm_mph = v_rpm_ms * 2.23694;
+
+  // Target speed display
+  const v_kmh = i.speed_ms * 3.6;
+  const v_mph = i.speed_ms * 2.23694;
+
+  // Traction limit
+  const F_traction_max = i.mu_tyre * m * g * i.weight_bias;
+
+  // Slip check
+  const traction_ok = F_total <= F_traction_max;
+
+  // Power-to-weight (kW/tonne)
+  const pw_ratio = P_kW / (m / 1000);
+
+  // Torque from RPM at wheel (output)
+  const tau_at_wheel_from_rpm = tau_engine * i.gr * i.eff;
+
+  // Render
+  renderOutputs({
+    F_accel, F_grade, F_roll, F_aero, F_total,
+    tau_wheel, tau_engine,
+    P_kW, P_hp,
+    omega, v_rpm_ms, v_rpm_kmh, v_rpm_mph,
+    v_kmh, v_mph,
+    F_traction_max, traction_ok,
+    pw_ratio, m, i
+  });
+}
+
+// ─── RENDER ──────────────────────────────────────
+function renderOutputs(r) {
+  const i = r.i;
+  const u = units === 'si';
+  document.getElementById('output-badge').textContent = '✓ Calculated';
+
+  // Primary outputs
+  document.getElementById('primary-outputs').innerHTML = `
+    <div class="outputs-grid result-appear">
+      <div class="output-card highlight">
+        <div class="output-label">Engine torque required</div>
+        <div class="output-value">${r.tau_engine.toFixed(1)}</div>
+        <div class="output-unit">N·m &nbsp;|&nbsp; ${(r.tau_engine * 0.7376).toFixed(1)} lb·ft</div>
+        <div class="output-formula">τ_eng = F·r / (GR·η)</div>
+      </div>
+      <div class="output-card highlight">
+        <div class="output-label">Engine power required</div>
+        <div class="output-value">${r.P_kW.toFixed(1)}</div>
+        <div class="output-unit">kW &nbsp;|&nbsp; ${r.P_hp.toFixed(1)} hp</div>
+        <div class="output-formula">P = τ · ω</div>
+      </div>
+      <div class="output-card highlight">
+        <div class="output-label">Vehicle speed from RPM</div>
+        <div class="output-value">${r.v_rpm_kmh.toFixed(1)}</div>
+        <div class="output-unit">km/h &nbsp;|&nbsp; ${r.v_rpm_mph.toFixed(1)} mph</div>
+        <div class="output-formula">v = 2πr·RPM / (60·GR)</div>
+      </div>
+      <div class="output-card highlight">
+        <div class="output-label">Total tractive force</div>
+        <div class="output-value">${r.F_total.toFixed(0)}</div>
+        <div class="output-unit">N &nbsp;|&nbsp; ${(r.F_total * 0.2248).toFixed(0)} lbf</div>
+        <div class="output-formula">F = ma + grade + roll + aero</div>
+      </div>
+      <div class="output-card highlight">
+        <div class="output-label">Wheel torque</div>
+        <div class="output-value">${r.tau_wheel.toFixed(1)}</div>
+        <div class="output-unit">N·m &nbsp;|&nbsp; ${(r.tau_wheel * 0.7376).toFixed(1)} lb·ft</div>
+        <div class="output-formula">τ_wheel = F · r</div>
+      </div>
+      <div class="output-card highlight">
+        <div class="output-label">Angular velocity ω</div>
+        <div class="output-value">${r.omega.toFixed(1)}</div>
+        <div class="output-unit">rad/s &nbsp;|&nbsp; ${i.rpm} RPM</div>
+        <div class="output-formula">ω = 2π·RPM / 60</div>
+      </div>
+      <div class="output-card highlight">
+        <div class="output-label">Max traction force</div>
+        <div class="output-value">${r.F_traction_max.toFixed(0)}</div>
+        <div class="output-unit">N &nbsp;|&nbsp; μ_tyre · W · bias</div>
+        <div class="output-formula">${r.traction_ok ? '✓ No wheel spin' : '⚠ Traction limit exceeded'}</div>
+      </div>
+      <div class="output-card highlight">
+        <div class="output-label">Power-to-weight ratio</div>
+        <div class="output-value">${r.pw_ratio.toFixed(1)}</div>
+        <div class="output-unit">kW/tonne &nbsp;|&nbsp; ${(r.pw_ratio * 0.746).toFixed(1)} hp/tonne</div>
+        <div class="output-formula">P / (m / 1000)</div>
+      </div>
+    </div>`;
+
+  // Force breakdown
+  const forces = [
+    { name: 'Inertia (acceleration)', val: r.F_accel, cls: 'bar-accel' },
+    { name: 'Grade resistance',        val: r.F_grade, cls: 'bar-grade' },
+    { name: 'Rolling resistance',      val: r.F_roll,  cls: 'bar-roll'  },
+    { name: 'Aerodynamic drag',        val: r.F_aero,  cls: 'bar-aero'  },
+  ];
+  const maxF = Math.max(...forces.map(f => Math.abs(f.val)), 1);
+
+  let rows = forces.map(f => `
+    <div class="force-row">
+      <span class="force-name">${f.name}</span>
+      <span class="force-val">${f.val.toFixed(1)} N</span>
+    </div>
+    <div class="force-bar-track">
+      <div class="force-bar ${f.cls}" style="width:${Math.min(100, Math.abs(f.val)/maxF*100).toFixed(1)}%"></div>
+    </div>`).join('');
+
+  document.getElementById('force-section').innerHTML = `
+    <div class="force-breakdown result-appear">
+      <h3>Resistance forces at ${i.speed_ms < 0.1 ? '0' : (i.speed_ms*3.6).toFixed(0)} km/h, ${i.grade_deg}° grade</h3>
+      ${rows}
+      <div class="total-force">
+        <span class="name">Total required</span>
+        <span class="val">${r.F_total.toFixed(1)} N &nbsp;|&nbsp; ${(r.F_total/1000).toFixed(3)} kN</span>
+      </div>
+    </div>`;
+
+  // Limits check
+  const checks = buildLimitsCheck(r);
+  let rows2 = checks.map(c => `
+    <tr>
+      <td>${c.name}</td>
+      <td>${c.value}</td>
+      <td>${c.limit}</td>
+      <td class="${c.cls}">${c.status}</td>
+    </tr>`).join('');
+
+  document.getElementById('limits-section').innerHTML = `
+    <table class="limits-table result-appear">
+      <thead><tr><th>Parameter</th><th>Calculated</th><th>Std. limit</th><th>Status</th></tr></thead>
+      <tbody>${rows2}</tbody>
+    </table>`;
+}
+
+function buildLimitsCheck(r) {
+  const i = r.i;
+  const v_kmh = r.v_rpm_kmh;
+  const v_ms = r.v_rpm_ms;
+  const checks = [];
+
+  // Max speed check (typical road: 130 km/h highway)
+  checks.push({
+    name: 'Operating speed vs highway limit',
+    value: v_kmh.toFixed(1) + ' km/h',
+    limit: '≤ 130 km/h',
+    status: v_kmh <= 130 ? '✓ OK' : v_kmh <= 200 ? '⚠ High' : '✗ Exceeds',
+    cls: v_kmh <= 130 ? 'status-ok' : v_kmh <= 200 ? 'status-warn' : 'status-bad',
+  });
+
+  // Acceleration check (SAE J2807: max 12 m/s²)
+  checks.push({
+    name: 'Acceleration (SAE J2807)',
+    value: i.accel.toFixed(2) + ' m/s²',
+    limit: '≤ 12 m/s²',
+    status: i.accel <= 12 ? '✓ OK' : '✗ Exceeds',
+    cls: i.accel <= 12 ? 'status-ok' : 'status-bad',
+  });
+
+  // Grade check (ISO 8855 max grade for passenger vehicles: 20°)
+  checks.push({
+    name: 'Grade angle (ISO 8855)',
+    value: Math.abs(i.grade_deg).toFixed(1) + '°',
+    limit: '≤ 20° (passenger)',
+    status: Math.abs(i.grade_deg) <= 20 ? '✓ OK' : '✗ Exceeds',
+    cls: Math.abs(i.grade_deg) <= 20 ? 'status-ok' : 'status-bad',
+  });
+
+  // Traction limit
+  checks.push({
+    name: 'Traction vs limit',
+    value: r.F_total.toFixed(0) + ' N',
+    limit: r.F_traction_max.toFixed(0) + ' N max',
+    status: r.traction_ok ? '✓ OK' : '⚠ Wheelspin risk',
+    cls: r.traction_ok ? 'status-ok' : 'status-warn',
+  });
+
+  // Rolling resistance (UNECE R117: μ ≤ 0.015 for class C1)
+  checks.push({
+    name: 'Rolling resistance (UNECE R117)',
+    value: i.mu_roll.toFixed(4),
+    limit: '≤ 0.015 (C1 tyre)',
+    status: i.mu_roll <= 0.015 ? '✓ OK' : i.mu_roll <= 0.025 ? '⚠ High' : '✗ Exceeds',
+    cls: i.mu_roll <= 0.015 ? 'status-ok' : i.mu_roll <= 0.025 ? 'status-warn' : 'status-bad',
+  });
+
+  // Drag coefficient vs class
+  const cd_limit = r.m < 1000 ? 0.45 : r.m < 3000 ? 0.40 : 0.60;
+  checks.push({
+    name: 'Drag coefficient (class avg.)',
+    value: i.cd.toFixed(3),
+    limit: `≤ ${cd_limit.toFixed(2)} (typical)`,
+    status: i.cd <= cd_limit ? '✓ OK' : '⚠ High drag',
+    cls: i.cd <= cd_limit ? 'status-ok' : 'status-warn',
+  });
+
+  // Power-to-weight
+  checks.push({
+    name: 'Power-to-weight ratio',
+    value: r.pw_ratio.toFixed(1) + ' kW/t',
+    limit: '5–400 kW/t typical',
+    status: r.pw_ratio >= 5 && r.pw_ratio <= 400 ? '✓ OK' : '⚠ Out of range',
+    cls: r.pw_ratio >= 5 && r.pw_ratio <= 400 ? 'status-ok' : 'status-warn',
+  });
+
+  // Drivetrain efficiency
+  checks.push({
+    name: 'Drivetrain efficiency',
+    value: (i.eff * 100).toFixed(0) + '%',
+    limit: '75%–97% (SAE J1349)',
+    status: i.eff >= 0.75 && i.eff <= 0.97 ? '✓ OK' : '⚠ Check',
+    cls: i.eff >= 0.75 && i.eff <= 0.97 ? 'status-ok' : 'status-warn',
+  });
+
+  return checks;
+}
+
+// ─── RESET ───────────────────────────────────────
+function resetAll() {
+  document.getElementById('mass').value         = 1500;
+  document.getElementById('payload').value      = 200;
+  document.getElementById('wheel-radius').value = 0.32;
+  document.getElementById('frontal-area').value = 2.2;
+  document.getElementById('rpm').value          = 4000;
+  document.getElementById('gear-ratio').value   = 3.5;
+  document.getElementById('efficiency').value   = 88;
+  document.getElementById('driven-wheels').value= 2;
+  document.getElementById('rho').value          = 1.225;
+  document.getElementById('cd').value           = 0.30;
+  document.getElementById('mu-roll').value      = 0.015;
+  document.getElementById('mu-tyre').value      = 0.85;
+  document.getElementById('acceleration').value = 2.0;
+  document.getElementById('grade-deg').value    = 0;
+  document.getElementById('target-speed').value = 120;
+  document.getElementById('weight-bias').value  = 50;
+  document.getElementById('vehicle-type').value = 'custom';
+
+  document.getElementById('primary-outputs').innerHTML = `<div class="placeholder"><div class="icon">⚡</div><p>Enter your vehicle parameters<br>and press <strong>Calculate</strong></p></div>`;
+  document.getElementById('force-section').innerHTML   = `<div class="placeholder"><div class="icon">📊</div><p>Force breakdown will appear here</p></div>`;
+  document.getElementById('limits-section').innerHTML  = `<div class="placeholder"><div class="icon">✓</div><p>Validation results will appear here</p></div>`;
+  document.getElementById('output-badge').textContent  = 'Awaiting input';
+}
+
+// Allow Enter key to calculate
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') calculate();
+});
+</script>
+</body>
+</html>
